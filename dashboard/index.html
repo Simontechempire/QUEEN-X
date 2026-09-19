@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Qᴜᴇᴇɴ X Dashboard</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #070707;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .dashboard {
+      width: 100%;
+      max-width: 520px;
+      background: #101010;
+      border: 1px solid #292929;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .status {
+      background: #181818;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .status-title {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .online {
+      color: #55ff88;
+      font-weight: bold;
+    }
+
+    .card {
+      background: #181818;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #000000;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      opacity: .85;
+    }
+
+    .footer {
+      text-align: center;
+      color: #666;
+      font-size: 12px;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="dashboard">
+
+    <header class="header">
+      <h1>Qᴜᴇᴇɴ X</h1>
+      <p>WhatsApp MD Dashboard</p>
+    </header>
+
+    <section class="status">
+      <div class="status-title">BOT STATUS</div>
+      <div class="online">● ONLINE</div>
+    </section>
+
+    <section class="card">
+      <h2>WhatsApp</h2>
+      <p>Connect your WhatsApp account to Qᴜᴇᴇɴ X.</p>
+      <button onclick="pairWhatsApp()">
+        Link WhatsApp
+      </button>
+    </section>
+
+    <section class="card">
+      <h2>Session</h2>
+      <p>Manage your connected WhatsApp session.</p>
+      <button onclick="sessionInfo()">
+        Session Manager
+      </button>
+    </section>
+
+    <section class="card">
+      <h2>Bot</h2>
+      <p>Access your Qᴜᴇᴇɴ X bot controls.</p>
+      <button onclick="botSettings()">
+        Bot Settings
+      </button>
+    </section>
+
+    <div class="footer">
+      Qᴜᴇᴇɴ X • Powered by Simon Tech
+    </div>
+
+  </main>
+
+  <script>
+    function pairWhatsApp() {
+      alert("WhatsApp pairing will be added next.");
+    }
+
+    function sessionInfo() {
+      alert("Session manager will be added next.");
+    }
+
+    function botSettings() {
+      alert("Bot settings will be added next.");
+    }
+  </script>
+
+</body>
+</html>
