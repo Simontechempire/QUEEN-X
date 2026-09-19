@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Qᴜᴇᴇɴ X — Login</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #070707;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 24px;
+      padding: 35px 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 40px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 18px;
+      border: 1px solid #333;
+      border-radius: 12px;
+      background: #181818;
+      color: #fff;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #777;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      color: #000;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: .85;
+    }
+
+    .register {
+      text-align: center;
+      margin-top: 20px;
+      color: #888;
+      font-size: 14px;
+    }
+
+    .register a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      color: #555;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-box">
+
+    <div class="logo">Qᴜᴇᴇɴ X</div>
+
+    <div class="subtitle">
+      Sign in to your dashboard
+    </div>
+
+    <form id="loginForm">
+
+      <label>Email</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        required
+      >
+
+      <label>Password</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter your password"
+        required
+      >
+
+      <button type="submit">
+        LOGIN
+      </button>
+
+    </form>
+
+    <div class="register">
+      Don't have an account?
+      <a href="#">Register</a>
+    </div>
+
+    <div class="footer">
+      Qᴜᴇᴇɴ X • Powered by Simon Tech
+    </div>
+
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      window.location.href = "/index.html";
+    });
+  </script>
+
+</body>
+</html>
