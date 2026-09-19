@@ -1,0 +1,141 @@
+const VIEW_ONCE_COMMANDS = [
+  "viewonce",
+  "vv",
+  "vo",
+  "view",
+  "once",
+  "saveview",
+  "savevo",
+  "retrieve",
+  "recover",
+  "viewmedia",
+  "viewinfo",
+  "viewhelp"
+];
+
+const VIEW_ONCE_MENU = `
+🌍⃝⃘‌‌‌━⋆─⋆──❂
+┊ ┊ ┊ ┊ ┊
+┊ ┊ ✫ ˚㋛ ⋆｡ ❀
+┊ ☠︎︎
+✧  x view once 𓂃✍︎𝄞
+╰────────────────❂
+
+┏━━━━━━━━━━━━━━━━━━━━━━❥❥❥
+┃ 𝗤ᴜᴇᴇɴ X — 𝗩𝗜𝗘𝗪 𝗢𝗡𝗖𝗘
+┗━━━━━━━━━━━━━━━━━━━━━━❥❥❥
+
+${VIEW_ONCE_COMMANDS.map(
+  (cmd, i) =>
+    `┃ ${String(i + 1).padStart(2, "0")}. .${cmd}`
+).join("\n")}
+
+┗━━━━━━━━━━━━━━━━━━━━━━❥❥❥
+
+𝗩𝗜𝗘𝗪 𝗢𝗡𝗖𝗘 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦
+`;
+
+async function send(sock, jid, text) {
+  return sock.sendMessage(jid, { text });
+}
+
+function getQuotedMessage(message) {
+  return (
+    message?.message?.extendedTextMessage
+      ?.contextInfo?.quotedMessage || null
+  );
+}
+
+function isViewOnce(message) {
+  const content = message?.message;
+
+  return Boolean(
+    content?.viewOnceMessage ||
+    content?.viewOnceMessageV2 ||
+    content?.viewOnceMessageV2Extension
+  );
+}
+
+async function handleViewOnceCommand({
+  sock,
+  remoteJid,
+  command,
+  message
+}) {
+  if (!VIEW_ONCE_COMMANDS.includes(command)) {
+    return false;
+  }
+
+  if (
+    command === "viewonce" ||
+    command === "viewhelp"
+  ) {
+    await send(sock, remoteJid, VIEW_ONCE_MENU);
+    return true;
+  }
+
+  const quoted = getQuotedMessage(message);
+
+  if (!quoted && !isViewOnce(message)) {
+    await send(
+      sock,
+      remoteJid,
+      `❌ 𝗩𝗜𝗘𝗪-𝗢𝗡𝗖𝗘 𝗠𝗘𝗗𝗜𝗔 𝗥𝗘𝗤𝗨𝗜𝗥𝗘𝗗
+
+𝗥𝗘𝗣𝗟𝗬 𝗧𝗢 𝗔 𝗩𝗜𝗘𝗪-𝗢𝗡𝗖𝗘 𝗠𝗘𝗦𝗦𝗔𝗚𝗘 𝗪𝗜𝗧𝗛:
+
+.${command}
+
+𝗢𝗡𝗟𝗬 𝗠𝗘𝗗𝗜𝗔 𝗬𝗢𝗨 𝗔𝗥𝗘 𝗔𝗨𝗧𝗛𝗢𝗥𝗜𝗭𝗘𝗗 𝗧𝗢 𝗔𝗖𝗖𝗘𝗦𝗦 𝗪𝗜𝗟𝗟 𝗕𝗘 𝗣𝗥𝗢𝗖𝗘𝗦𝗦𝗘𝗗.`
+    );
+
+    return true;
+  }
+
+  if (command === "viewinfo") {
+    await send(
+      sock,
+      remoteJid,
+      `👁️ 𝗩𝗜𝗘𝗪 𝗢𝗡𝗖𝗘 𝗜𝗡𝗙𝗢
+
+𝗩𝗜𝗘𝗪-𝗢𝗡𝗖𝗘 𝗠𝗘𝗗𝗜𝗔 𝗗𝗘𝗧𝗘𝗖𝗧𝗘𝗗.
+
+⚙️ 𝗠𝗘𝗗𝗜𝗔 𝗛𝗔𝗡𝗗𝗟𝗘𝗥 𝗥𝗘𝗔𝗗𝗬.`
+    );
+
+    return true;
+  }
+
+  await send(
+    sock,
+    remoteJid,
+    `👁️ 𝗩𝗜𝗘𝗪 𝗢𝗡𝗖𝗘
+
+𝗖𝗢𝗠𝗠𝗔𝗡𝗗:
+.${command}
+
+✅ 𝗩𝗜𝗘𝗪-𝗢𝗡𝗖𝗘 𝗠𝗘𝗗𝗜𝗔 𝗗𝗘𝗧𝗘𝗖𝗧𝗘𝗗.
+
+⚙️ 𝗣𝗥𝗢𝗖𝗘𝗦𝗦𝗜𝗡𝗚 𝗛𝗔𝗡𝗗𝗟𝗘𝗥 𝗥𝗘𝗔𝗗𝗬.`
+  );
+
+  return true;
+}
+
+module.exports = {
+  name: "viewonce",
+  aliases: ["vv", "vo"],
+  commands: VIEW_ONCE_COMMANDS,
+  handleViewOnceCommand,
+
+  execute: async ({
+    sock,
+    remoteJid
+  }) => {
+    await send(
+      sock,
+      remoteJid,
+      VIEW_ONCE_MENU
+    );
+  }
+};
