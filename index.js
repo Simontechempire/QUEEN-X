@@ -1,36 +1,24 @@
 require("dotenv").config();
 
 const express = require("express");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// HTML dashboard
+app.use(express.static(path.join(__dirname, "dashboard")));
+
+// Home
 app.get("/", (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Qᴜᴇᴇɴ X</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      </head>
-      <body style="
-        background:#080808;
-        color:white;
-        font-family:Arial;
-        text-align:center;
-        padding:80px 20px;
-      ">
-        <h1>Qᴜᴇᴇɴ X</h1>
-        <p>WhatsApp MD Dashboard</p>
-        <p>Server Online</p>
-      </body>
-    </html>
-  `);
+  res.sendFile(path.join(__dirname, "dashboard", "index.html"));
 });
 
+// Health check
 app.get("/health", (req, res) => {
   res.json({
     status: "online",
@@ -38,6 +26,7 @@ app.get("/health", (req, res) => {
   });
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Qᴜᴇᴇɴ X running on port ${PORT}`);
 });
