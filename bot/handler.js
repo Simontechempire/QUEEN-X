@@ -1,4 +1,7 @@
 const config = require("../config");
+const { loadCommands } = require("../lib/commandLoader");
+
+const commands = loadCommands();
 
 function createMessageHandler(sock) {
   if (!sock) {
@@ -41,18 +44,27 @@ function createMessageHandler(sock) {
       }
 
       const parts = body.split(/\s+/);
-      const command = parts.shift().toLowerCase();
+      const commandName = parts.shift().toLowerCase();
       const args = parts;
 
+      const command = commands.get(commandName);
+
+      if (!command) {
+        return;
+      }
+
       console.log(
-        `[COMMAND] ${command}`,
-        args
+        `[COMMAND] ${commandName}`
       );
 
-      // Command loader will be connected here next.
-      console.log(
-        `Command received: ${command}`
-      );
+      await command.execute({
+        sock,
+        message,
+        remoteJid,
+        args,
+        command: commandName,
+        config
+      });
 
     } catch (error) {
       console.error(
