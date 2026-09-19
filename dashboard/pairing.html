@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Qᴜᴇᴇɴ X — Link WhatsApp</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #070707;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 480px;
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 24px;
+      padding: 35px 25px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .info {
+      background: #181818;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #333;
+      border-radius: 12px;
+      background: #181818;
+      color: white;
+      outline: none;
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: white;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: .85;
+    }
+
+    .pair-code {
+      display: none;
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 15px;
+      background: #181818;
+    }
+
+    .code {
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 5px;
+      margin-top: 10px;
+    }
+
+    .back {
+      display: block;
+      margin-top: 20px;
+      color: #888;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .footer {
+      margin-top: 25px;
+      color: #555;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+
+    <h1>Qᴜᴇᴇɴ X</h1>
+
+    <div class="subtitle">
+      Link your WhatsApp account
+    </div>
+
+    <div class="info">
+      Enter your WhatsApp phone number with country code.
+      <br>
+      Example: +2348012345678
+    </div>
+
+    <input
+      type="tel"
+      id="phone"
+      placeholder="+2348012345678"
+    >
+
+    <button onclick="generatePairing()">
+      GENERATE PAIRING CODE
+    </button>
+
+    <div class="pair-code" id="pairCode">
+      <div>YOUR PAIRING CODE</div>
+
+      <div class="code" id="code">
+        --------
+      </div>
+    </div>
+
+    <a class="back" href="/dashboard">
+      ← Back to Dashboard
+    </a>
+
+    <div class="footer">
+      Qᴜᴇᴇɴ X • Powered by Simon Tech
+    </div>
+
+  </div>
+
+  <script>
+    async function generatePairing() {
+
+      const phone =
+        document.getElementById("phone").value.trim();
+
+      if (!phone) {
+        alert("Enter your WhatsApp phone number.");
+        return;
+      }
+
+      try {
+
+        const response = await fetch("/api/pair", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ phone })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(result.message || "Pairing failed.");
+          return;
+        }
+
+        document.getElementById("pairCode").style.display = "block";
+
+        document.getElementById("code").textContent =
+          result.code || "--------";
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to connect to the server.");
+
+      }
+    }
+  </script>
+
+</body>
+</html>
