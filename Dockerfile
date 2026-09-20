@@ -1,6 +1,10 @@
-FROM node:20-slim
+FROM node:20-bookworm
 
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y git \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 
@@ -8,8 +12,6 @@ RUN npm install --omit=dev
 
 COPY . .
 
-ENV NODE_ENV=production
-
 EXPOSE 3000
 
-CMD ["node", "index.js"]
+CMD ["npm", "start"]
