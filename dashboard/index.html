@@ -17,9 +17,8 @@
       min-height: 100vh;
       font-family: Arial, sans-serif;
       background: #070707;
-      color: #ffffff;
+      color: #fff;
       display: flex;
-      align-items: center;
       justify-content: center;
       padding: 20px;
     }
@@ -49,29 +48,23 @@
       font-size: 14px;
     }
 
-    .status {
+    .status,
+    .card {
       background: #181818;
       border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
     }
 
     .status-title {
-      font-size: 13px;
       color: #999;
+      font-size: 13px;
       margin-bottom: 8px;
     }
 
     .online {
       color: #55ff88;
       font-weight: bold;
-    }
-
-    .card {
-      background: #181818;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 15px;
     }
 
     .card h2 {
@@ -85,20 +78,70 @@
       margin-bottom: 15px;
     }
 
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid #333;
+      border-radius: 12px;
+      background: #0b0b0b;
+      color: white;
+      outline: none;
+      font-size: 15px;
+    }
+
     button {
       width: 100%;
       padding: 14px;
       border: 0;
       border-radius: 12px;
-      background: #ffffff;
-      color: #000000;
+      background: #fff;
+      color: #000;
       font-weight: bold;
       cursor: pointer;
       font-size: 15px;
+      margin-top: 5px;
     }
 
     button:hover {
       opacity: .85;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .result {
+      display: none;
+      margin-top: 15px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #0b0b0b;
+      border: 1px solid #292929;
+      text-align: center;
+    }
+
+    .pair-code {
+      font-size: 25px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      margin-top: 10px;
+      color: #55ff88;
+    }
+
+    .message {
+      color: #aaa;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .error {
+      color: #ff6666;
+    }
+
+    .success {
+      color: #55ff88;
     }
 
     .footer {
@@ -112,61 +155,269 @@
 
 <body>
 
-  <main class="dashboard">
+<main class="dashboard">
 
-    <header class="header">
-      <h1>Qᴜᴇᴇɴ X</h1>
-      <p>WhatsApp MD Dashboard</p>
-    </header>
+  <header class="header">
+    <h1>Qᴜᴇᴇɴ X</h1>
+    <p>WhatsApp MD Dashboard</p>
+  </header>
 
-    <section class="status">
-      <div class="status-title">BOT STATUS</div>
-      <div class="online">● ONLINE</div>
-    </section>
+  <section class="status">
+    <div class="status-title">BOT STATUS</div>
+    <div class="online">● ONLINE</div>
+  </section>
 
-    <section class="card">
-      <h2>WhatsApp</h2>
-      <p>Connect your WhatsApp account to Qᴜᴇᴇɴ X.</p>
-      <button onclick="pairWhatsApp()">
-        Link WhatsApp
-      </button>
-    </section>
+  <!-- WHATSAPP -->
+  <section class="card">
 
-    <section class="card">
-      <h2>Session</h2>
-      <p>Manage your connected WhatsApp session.</p>
-      <button onclick="sessionInfo()">
-        Session Manager
-      </button>
-    </section>
+    <h2>📱 WhatsApp</h2>
 
-    <section class="card">
-      <h2>Bot</h2>
-      <p>Access your Qᴜᴇᴇɴ X bot controls.</p>
-      <button onclick="botSettings()">
-        Bot Settings
-      </button>
-    </section>
+    <p>
+      Connect your WhatsApp account to Qᴜᴇᴇɴ X
+      using a pairing code.
+    </p>
 
-    <div class="footer">
-      Qᴜᴇᴇɴ X • Powered by Simon Tech
-    </div>
+    <input
+      id="phone"
+      type="tel"
+      placeholder="Enter number e.g. 2348012345678"
+      autocomplete="off"
+    >
 
-  </main>
+    <button
+      id="pairButton"
+      onclick="pairWhatsApp()"
+    >
+      🔗 Link WhatsApp
+    </button>
 
-  <script>
-    function pairWhatsApp() {
-      alert("WhatsApp pairing will be added next.");
+    <div
+      id="pairResult"
+      class="result"
+    ></div>
+
+  </section>
+
+  <!-- SESSION -->
+  <section class="card">
+
+    <h2>🔐 Session</h2>
+
+    <p>
+      Check the current WhatsApp connection.
+    </p>
+
+    <button onclick="sessionInfo()">
+      Session Manager
+    </button>
+
+    <div
+      id="sessionResult"
+      class="result"
+    ></div>
+
+  </section>
+
+  <!-- BOT -->
+  <section class="card">
+
+    <h2>⚙️ Bot</h2>
+
+    <p>
+      Access your Qᴜᴇᴇɴ X bot controls.
+    </p>
+
+    <button onclick="botSettings()">
+      Bot Settings
+    </button>
+
+  </section>
+
+  <div class="footer">
+    Qᴜᴇᴇɴ X • Powered by Simon Tech
+  </div>
+
+</main>
+
+<script>
+
+async function pairWhatsApp() {
+
+  const phoneInput =
+    document.getElementById("phone");
+
+  const button =
+    document.getElementById("pairButton");
+
+  const result =
+    document.getElementById("pairResult");
+
+  const phone =
+    phoneInput.value.trim();
+
+  if (!phone) {
+    showResult(
+      result,
+      "❌ Enter your WhatsApp number first.",
+      "error"
+    );
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "⏳ Generating code...";
+
+  result.style.display = "block";
+
+  result.innerHTML =
+    `<div class="message">
+      Connecting to WhatsApp...
+    </div>`;
+
+  try {
+
+    const response =
+      await fetch("/api/pair", {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+          phone
+        })
+      });
+
+    const data =
+      await response.json();
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.message ||
+        "Pairing request failed."
+      );
     }
 
-    function sessionInfo() {
-      alert("Session manager will be added next.");
+    result.innerHTML = `
+      <div class="message success">
+        ✅ Pairing code generated
+      </div>
+
+      <div class="pair-code">
+        ${escapeHtml(data.code)}
+      </div>
+
+      <div class="message">
+        Open WhatsApp → Linked Devices
+        → Link a Device → Link with phone number
+        and enter this code.
+      </div>
+    `;
+
+  } catch (error) {
+
+    result.innerHTML = `
+      <div class="message error">
+        ❌ ${escapeHtml(error.message)}
+      </div>
+    `;
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = "🔗 Link WhatsApp";
+
+  }
+}
+
+
+async function sessionInfo() {
+
+  const result =
+    document.getElementById("sessionResult");
+
+  result.style.display = "block";
+
+  result.innerHTML =
+    `<div class="message">
+      ⏳ Checking WhatsApp session...
+    </div>`;
+
+  try {
+
+    const response =
+      await fetch("/api/session");
+
+    const data =
+      await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.message ||
+        "Unable to check session."
+      );
     }
 
-    function botSettings() {
-      alert("Bot settings will be added next.");
-    }
-  </script>
+    result.innerHTML = `
+      <div class="message">
+        Status:
+        <strong>
+          ${escapeHtml(data.status || "Unknown")}
+        </strong>
+      </div>
+    `;
+
+  } catch (error) {
+
+    result.innerHTML = `
+      <div class="message error">
+        ❌ ${escapeHtml(error.message)}
+      </div>
+    `;
+
+  }
+}
+
+
+function botSettings() {
+
+  alert(
+    "⚙️ Bot settings will be connected next."
+  );
+
+}
+
+
+function showResult(
+  element,
+  message,
+  type
+) {
+
+  element.style.display = "block";
+
+  element.innerHTML =
+    `<div class="message ${type}">
+      ${escapeHtml(message)}
+    </div>`;
+}
+
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+</script>
 
 </body>
 </html>
