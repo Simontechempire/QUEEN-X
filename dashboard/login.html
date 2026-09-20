@@ -1,40 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Queen X - Login</title>
+<style>
+body{background:#070707;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.box{background:#151515;border:1px solid #2a2a2a;padding:30px;border-radius:20px;width:90%;max-width:400px;text-align:center}
+input{width:100%;padding:14px;margin:15px 0;background:#0d0d0d;border:1px solid #333;border-radius:12px;color:#fff}
+button{width:100%;padding:14px;background:#fff;color:#000;font-weight:bold;border:0;border-radius:12px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>🔐 QUEEN X</h2>
+<p style="color:#777;font-size:13px;margin-top:8px">Enter Panel PIN to continue</p>
+<input id="pin" type="password" placeholder="Enter PIN (default: 1234)">
+<button onclick="login()">Unlock Dashboard</button>
+<p id="msg" style="color:#ff5555;margin-top:12px;font-size:13px"></p>
+</div>
 <script>
-  document
-    .getElementById("loginForm")
-    .addEventListener("submit", async function (event) {
-
-      event.preventDefault();
-
-      const email =
-        document.getElementById("email").value.trim();
-
-      const password =
-        document.getElementById("password").value;
-
-      try {
-        const response = await fetch("/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email,
-            password
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          alert(result.message);
-          return;
-        }
-
-        window.location.href = "/dashboard";
-
-      } catch (error) {
-        console.error(error);
-        alert("Unable to connect to the server.");
-      }
-    });
+function login(){
+  const pin = document.getElementById('pin').value;
+  if(pin === '1234'){ // CHANGE YOUR PIN HERE
+    localStorage.setItem('queenx_auth','true');
+    window.location.href = '/index.html';
+  } else {
+    document.getElementById('msg').textContent = '❌ Wrong PIN! Default is 1234';
+  }
+}
 </script>
+</body>
+</html>
