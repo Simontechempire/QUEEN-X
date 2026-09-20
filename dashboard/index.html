@@ -1,274 +1,386 @@
-<style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    overflow-x: hidden;
-
-    background:
-      radial-gradient(circle at 10% 20%, rgba(255, 0, 128, .35), transparent 30%),
-      radial-gradient(circle at 90% 10%, rgba(0, 140, 255, .35), transparent 30%),
-      radial-gradient(circle at 80% 85%, rgba(150, 0, 255, .35), transparent 30%),
-      radial-gradient(circle at 15% 90%, rgba(0, 255, 180, .25), transparent 30%),
-      linear-gradient(135deg, #05000f, #09001c, #001329, #12001c);
-
-    background-size: 200% 200%;
-    animation: backgroundMove 12s ease infinite;
-  }
-
-  @keyframes backgroundMove {
-    0% {
-      background-position: 0% 50%;
-    }
-
-    50% {
-      background-position: 100% 50%;
-    }
-
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-
-  .dashboard {
-    width: 100%;
-    max-width: 520px;
-
-    background: rgba(10, 10, 20, .82);
-
-    border: 1px solid rgba(255, 255, 255, .15);
-
-    border-radius: 24px;
-
-    padding: 30px;
-
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-
-    box-shadow:
-      0 20px 60px rgba(0,0,0,.7),
-      0 0 40px rgba(120, 0, 255, .18);
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .header h1 {
-    font-size: 42px;
-    margin-bottom: 8px;
-
-    background: linear-gradient(
-      90deg,
-      #ff4fd8,
-      #8c7bff,
-      #35d9ff,
-      #66ffad
-    );
-
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-
-    text-shadow: 0 0 30px rgba(150, 100, 255, .3);
-  }
-
-  .header p {
-    color: #bbb;
-    font-size: 14px;
-  }
-
-  .status,
-  .card {
-    background: rgba(25, 25, 35, .78);
-
-    border: 1px solid rgba(255, 255, 255, .08);
-
-    border-radius: 16px;
-
-    padding: 20px;
-
-    margin-bottom: 16px;
-
-    box-shadow:
-      0 8px 30px rgba(0,0,0,.25);
-
-    transition: .3s ease;
-  }
-
-  .status:hover,
-  .card:hover {
-    transform: translateY(-3px);
-
-    border-color: rgba(150, 100, 255, .35);
-
-    box-shadow:
-      0 10px 35px rgba(100, 50, 255, .18);
-  }
-
-  .status-title {
-    color: #999;
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  .online {
-    color: #55ff88;
-    font-weight: bold;
-  }
-
-  .card h2 {
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-
-  .card p {
-    color: #aaa;
-    font-size: 14px;
-    margin-bottom: 15px;
-    line-height: 1.5;
-  }
-
-  input {
-    width: 100%;
-
-    padding: 14px;
-
-    margin-bottom: 12px;
-
-    border: 1px solid rgba(255,255,255,.15);
-
-    border-radius: 12px;
-
-    background: rgba(0,0,0,.45);
-
-    color: white;
-
-    outline: none;
-
-    font-size: 15px;
-
-    transition: .3s ease;
-  }
-
-  input:focus {
-    border-color: #9b6cff;
-
-    box-shadow:
-      0 0 15px rgba(155,108,255,.25);
-  }
-
-  input::placeholder {
-    color: #777;
-  }
-
-  button {
-    width: 100%;
-
-    padding: 14px;
-
-    border: 0;
-
-    border-radius: 12px;
-
-    background: linear-gradient(
-      90deg,
-      #ff4fd8,
-      #8c5cff,
-      #27c9ff
-    );
-
-    color: white;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    font-size: 15px;
-
-    margin-top: 5px;
-
-    box-shadow:
-      0 8px 25px rgba(130,70,255,.25);
-
-    transition: .3s ease;
-  }
-
-  button:hover {
-    transform: translateY(-2px);
-
-    box-shadow:
-      0 10px 30px rgba(150,70,255,.4);
-  }
-
-  button:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-  }
-
-  .result {
-    display: none;
-
-    margin-top: 15px;
-
-    padding: 16px;
-
-    border-radius: 12px;
-
-    background: rgba(0,0,0,.45);
-
-    border: 1px solid rgba(255,255,255,.1);
-
-    text-align: center;
-  }
-
-  .pair-code {
-    font-size: 28px;
-
-    font-weight: bold;
-
-    letter-spacing: 4px;
-
-    margin: 12px 0;
-
-    color: #66ffad;
-
-    text-shadow:
-      0 0 15px rgba(80,255,170,.5);
-  }
-
-  .message {
-    color: #aaa;
-
-    font-size: 13px;
-
-    line-height: 1.6;
-  }
-
-  .error {
-    color: #ff6666;
-  }
-
-  .success {
-    color: #55ff88;
-  }
-
-  .footer {
-    text-align: center;
-
-    color: #777;
-
-    font-size: 12px;
-
-    margin-top: 25px;
-  }
-</style>
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Qᴜᴇᴇɴ X Dashboard</title>    <style>  
+    * {  
+      box-sizing: border-box;  
+      margin: 0;  
+      padding: 0;  
+    }  
+  
+    body {  
+      min-height: 100vh;  
+      font-family: Arial, sans-serif;  
+      background: #070707;  
+      color: #fff;  
+      display: flex;  
+      justify-content: center;  
+      padding: 30px;  
+    }  
+  
+    .dashboard {  
+      width: 100%;  
+      max-width: 520px;  
+      background: #999999;  
+      border: 1px solid #292929;  
+      border-radius: 24px;  
+      padding: 30px;  
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);  
+    }  
+  
+    .header {  
+      text-align: center;  
+      margin-bottom: 90px;  
+    }  
+  
+    .header h1 {  
+      font-size: 38px;  
+      margin-bottom: 8px;  
+    }  
+  
+    .header p {  
+      color: #999;  
+      font-size: 90px;  
+    }  
+  
+    .status,  
+    .card {  
+      background: #181818;  
+      border-radius: 16px;  
+      padding: 20px;  
+      margin-bottom: 16px;  
+    }  
+  
+    .status-title {  
+      color: #999;  
+      font-size: 13px;  
+      margin-bottom: 8px;  
+    }  
+  
+    .online {  
+      color: #55ff88;  
+      font-weight: bold;  
+    }  
+  
+    .card h2 {  
+      font-size: 18px;  
+      margin-bottom: 8px;  
+    }  
+  
+    .card p {  
+      color: #999;  
+      font-size: 14px;  
+      margin-bottom: 15px;  
+    }  
+  
+    input {  
+      width: 100%;  
+      padding: 14px;  
+      margin-bottom: 12px;  
+      border: 1px solid #333;  
+      border-radius: 12px;  
+      background: #0b0b0b;  
+      color: white;  
+      outline: none;  
+      font-size: 15px;  
+    }  
+  
+    button {  
+      width: 100%;  
+      padding: 14px;  
+      border: 0;  
+      border-radius: 12px;  
+      background: #fff;  
+      color: #000;  
+      font-weight: bold;  
+      cursor: pointer;  
+      font-size: 15px;  
+      margin-top: 5px;  
+    }  
+  
+    button:hover {  
+      opacity: .85;  
+    }  
+  
+    button:disabled {  
+      opacity: .5;  
+      cursor: not-allowed;  
+    }  
+  
+    .result {  
+      display: none;  
+      margin-top: 15px;  
+      padding: 16px;  
+      border-radius: 12px;  
+      background: #0b0b0b;  
+      border: 1px solid #292929;  
+      text-align: center;  
+    }  
+  
+    .pair-code {  
+      font-size: 25px;  
+      font-weight: bold;  
+      letter-spacing: 3px;  
+      margin-top: 10px;  
+      color: #55ff88;  
+    }  
+  
+    .message {  
+      color: #aaa;  
+      font-size: 13px;  
+      line-height: 1.5;  
+    }  
+  
+    .error {  
+      color: #ff6666;  
+    }  
+  
+    .success {  
+      color: #55ff88;  
+    }  
+  
+    .footer {  
+      text-align: center;  
+      color: #666;  
+      font-size: 12px;  
+      margin-top: 25px;  
+    }  
+  </style>  </head>  <body>  <main class="dashboard">    <header class="header">  
+    <h1>Qᴜᴇᴇɴ X</h1>  
+    <p>WhatsApp MD Dashboard</p>  
+  </header>    <section class="status">  
+    <div class="status-title">BOT STATUS</div>  
+    <div class="online">● ONLINE</div>  
+  </section>    <!-- WHATSAPP -->    <section class="card">  <h2>📱 WhatsApp</h2>  
+
+<p>  
+  Connect your WhatsApp account to Qᴜᴇᴇɴ X  
+  using a pairing code.  
+</p>  
+
+<input  
+  id="phone"  
+  type="tel"  
+  placeholder="Enter number e.g. 2348012345678"  
+  autocomplete="off"  
+>  
+
+<button  
+  id="pairButton"  
+  onclick="pairWhatsApp()"  
+>  
+  🔗 Link WhatsApp  
+</button>  
+
+<div  
+  id="pairResult"  
+  class="result"  
+></div>
+
+  </section>    <!-- SESSION -->    <section class="card">  <h2>🔐 Session</h2>  
+
+<p>  
+  Check the current WhatsApp connection.  
+</p>  
+
+<button onclick="sessionInfo()">  
+  Session Manager  
+</button>  
+
+<div  
+  id="sessionResult"  
+  class="result"  
+></div>
+
+  </section>    <!-- BOT -->    <section class="card">  <h2>⚙️ Bot</h2>  
+
+<p>  
+  Access your Qᴜᴇᴇɴ X bot controls.  
+</p>  
+
+<button onclick="botSettings()">  
+  Bot Settings  
+</button>
+
+  </section>    <div class="footer">  
+    Qᴜᴇᴇɴ X • Powered by Simon Tech  
+  </div>  </main>  <script>  
+  
+async function pairWhatsApp() {  
+  
+  const phoneInput =  
+    document.getElementById("phone");  
+  
+  const button =  
+    document.getElementById("pairButton");  
+  
+  const result =  
+    document.getElementById("pairResult");  
+  
+  const phone =  
+    phoneInput.value.trim();  
+  
+  if (!phone) {  
+    showResult(  
+      result,  
+      "❌ Enter your WhatsApp number first.",  
+      "error"  
+    );  
+    return;  
+  }  
+  
+  button.disabled = true;  
+  button.textContent = "⏳ Generating code...";  
+  
+  result.style.display = "block";  
+  
+  result.innerHTML =  
+    `<div class="message">  
+      Connecting to WhatsApp...  
+    </div>`;  
+  
+  try {  
+  
+    const response =  
+      await fetch("/api/pair", {  
+        method: "POST",  
+  
+        headers: {  
+          "Content-Type":  
+            "application/json"  
+        },  
+  
+        body: JSON.stringify({  
+          phone  
+        })  
+      });  
+  
+    const data =  
+      await response.json();  
+  
+    if (!response.ok || !data.success) {  
+  
+      throw new Error(  
+        data.message ||  
+        "Pairing request failed."  
+      );  
+    }  
+  
+    result.innerHTML = `  
+      <div class="message success">  
+        ✅ Pairing code generated  
+      </div>  
+  
+      <div class="pair-code">  
+        ${escapeHtml(data.code)}  
+      </div>  
+  
+      <div class="message">  
+        Open WhatsApp → Linked Devices  
+        → Link a Device → Link with phone number  
+        and enter this code.  
+      </div>  
+    `;  
+  
+  } catch (error) {  
+  
+    result.innerHTML = `  
+      <div class="message error">  
+        ❌ ${escapeHtml(error.message)}  
+      </div>  
+    `;  
+  
+  } finally {  
+  
+    button.disabled = false;  
+    button.textContent = "🔗 Link WhatsApp";  
+  
+  }  
+}  
+  
+  
+async function sessionInfo() {  
+  
+  const result =  
+    document.getElementById("sessionResult");  
+  
+  result.style.display = "block";  
+  
+  result.innerHTML =  
+    `<div class="message">  
+      ⏳ Checking WhatsApp session...  
+    </div>`;  
+  
+  try {  
+  
+    const response =  
+      await fetch("/api/session");  
+  
+    const data =  
+      await response.json();  
+  
+    if (!response.ok || !data.success) {  
+      throw new Error(  
+        data.message ||  
+        "Unable to check session."  
+      );  
+    }  
+  
+    result.innerHTML = `  
+      <div class="message">  
+        Status:  
+        <strong>  
+          ${escapeHtml(data.status || "Unknown")}  
+        </strong>  
+      </div>  
+    `;  
+  
+  } catch (error) {  
+  
+    result.innerHTML = `  
+      <div class="message error">  
+        ❌ ${escapeHtml(error.message)}  
+      </div>  
+    `;  
+  
+  }  
+}  
+  
+  
+function botSettings() {  
+  
+  alert(  
+    "⚙️ Bot settings will be connected next."  
+  );  
+  
+}  
+  
+  
+function showResult(  
+  element,  
+  message,  
+  type  
+) {  
+  
+  element.style.display = "block";  
+  
+  element.innerHTML =  
+    `<div class="message ${type}">  
+      ${escapeHtml(message)}  
+    </div>`;  
+}  
+  
+  
+function escapeHtml(value) {  
+  
+  return String(value)  
+    .replace(/&/g, "&amp;")  
+    .replace(/</g, "&lt;")  
+    .replace(/>/g, "&gt;")  
+    .replace(/"/g, "&quot;")  
+    .replace(/'/g, "&#039;");  
+  
+}  
+  
+</script>  </body>  
+</html>
