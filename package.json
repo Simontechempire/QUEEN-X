@@ -1,7 +1,7 @@
 {
   "name": "queen-x",
   "version": "1.0.0",
-  "description": "Queen X WhatsApp MD Bot with authenticated dashboard",
+  "description": "Queen X WhatsApp MD Bot with HTML Dashboard",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
