@@ -1,97 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>QUEEN X - Register</title>
+<title>QUEEN X Register</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
 body{
-  background:#070707;
-  color:#fff;
-  font-family:Arial,sans-serif;
+  margin:0;
+  min-height:100vh;
+  background:#050505;
+  color:white;
+  font-family:Arial;
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
-  padding:20px
+  padding:20px;
 }
 
 .box{
-  background:#151515;
-  border:1px solid #2a2a2a;
-  padding:30px;
-  border-radius:20px;
   width:100%;
   max-width:400px;
+  background:#151515;
+  padding:30px;
+  border-radius:20px;
+  border:1px solid #292929;
   text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.6)
-}
-
-h2{font-size:28px;margin-bottom:8px}
-
-.subtitle{
-  color:#777;
-  font-size:13px;
-  margin-bottom:25px
 }
 
 input{
   width:100%;
-  padding:14px;
-  margin:8px 0;
-  background:#0d0d0d;
-  border:1px solid #333;
+  box-sizing:border-box;
+  padding:15px;
+  margin:7px 0;
   border-radius:12px;
-  color:#fff;
-  outline:none;
-  font-size:14px
+  border:1px solid #333;
+  background:#090909;
+  color:white;
 }
-
-input:focus{border-color:#55ff88}
 
 button{
   width:100%;
-  padding:14px;
+  padding:15px;
   margin-top:10px;
-  background:#fff;
-  color:#000;
-  font-weight:bold;
   border:0;
   border-radius:12px;
-  cursor:pointer
+  background:white;
+  color:black;
+  font-weight:bold;
 }
 
-button:disabled{
-  opacity:.5;
-  cursor:not-allowed
-}
-
-.login{
-  margin-top:18px;
-  padding-top:18px;
-  border-top:1px solid #292929;
-  color:#777;
-  font-size:13px
-}
-
-.login a{
+a{
   color:#55ff88;
   text-decoration:none;
-  font-weight:bold
 }
 
-.message{
+#message{
   margin-top:15px;
   font-size:13px;
-  line-height:1.5
 }
-
-.error{color:#ff5555}
-.success{color:#55ff88}
 </style>
 </head>
 
@@ -99,147 +67,149 @@ button:disabled{
 
 <div class="box">
 
-  <h2>👑 QUEEN X</h2>
+<h1>👑 QUEEN X</h1>
 
-  <p class="subtitle">
-    Create your dashboard account
-  </p>
+<p>Create your account</p>
 
-  <form id="registerForm">
+<form id="registerForm">
 
-    <input
-      id="username"
-      type="text"
-      placeholder="Username"
-      autocomplete="username"
-      required
-    >
+<input
+ id="username"
+ placeholder="Username"
+ required
+>
 
-    <input
-      id="email"
-      type="email"
-      placeholder="Email address"
-      autocomplete="email"
-      required
-    >
+<input
+ id="email"
+ type="email"
+ placeholder="Email"
+ required
+>
 
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-      autocomplete="new-password"
-      required
-    >
+<input
+ id="password"
+ type="password"
+ placeholder="Password"
+ required
+>
 
-    <input
-      id="confirmPassword"
-      type="password"
-      placeholder="Confirm password"
-      autocomplete="new-password"
-      required
-    >
+<input
+ id="confirmPassword"
+ type="password"
+ placeholder="Confirm password"
+ required
+>
 
-    <button id="registerButton" type="submit">
-      👑 Create Account
-    </button>
+<button id="registerBtn">
+👑 CREATE ACCOUNT
+</button>
 
-  </form>
+</form>
 
-  <div id="msg" class="message"></div>
+<div id="message"></div>
 
-  <div class="login">
-    Already have an account?
-    <a href="/login.html">Login</a>
-  </div>
+<p>
+Already registered?
+<a href="/login.html">Login</a>
+</p>
 
 </div>
 
 <script>
 
 document
-  .getElementById("registerForm")
-  .addEventListener("submit", async function(event){
+.getElementById("registerForm")
+.addEventListener("submit", async event => {
 
-    event.preventDefault();
+  event.preventDefault();
 
-    const username =
-      document.getElementById("username").value.trim();
+  const username =
+    document.getElementById("username")
+      .value.trim();
 
-    const email =
-      document.getElementById("email").value.trim();
+  const email =
+    document.getElementById("email")
+      .value.trim();
 
-    const password =
-      document.getElementById("password").value;
+  const password =
+    document.getElementById("password")
+      .value;
 
-    const confirmPassword =
-      document.getElementById("confirmPassword").value;
+  const confirmPassword =
+    document.getElementById("confirmPassword")
+      .value;
 
-    const button =
-      document.getElementById("registerButton");
+  const message =
+    document.getElementById("message");
 
-    const msg =
-      document.getElementById("msg");
+  const button =
+    document.getElementById("registerBtn");
 
-    if(password !== confirmPassword){
+  if(password !== confirmPassword){
 
-      msg.className="message error";
-      msg.textContent="❌ Passwords do not match.";
-      return;
-    }
+    message.style.color="#ff5555";
+    message.textContent=
+      "❌ Passwords do not match.";
 
-    if(password.length < 6){
+    return;
+  }
 
-      msg.className="message error";
-      msg.textContent=
-        "❌ Password must contain at least 6 characters.";
-      return;
-    }
+  button.disabled=true;
+  button.textContent=
+    "⏳ CREATING...";
 
-    button.disabled=true;
-    button.textContent="⏳ Creating Account...";
+  try{
 
-    try{
+    const response =
+      await fetch("/api/register",{
 
-      const response=await fetch("/api/register",{
         method:"POST",
-        credentials:"same-origin",
+
         headers:{
           "Content-Type":"application/json"
         },
+
         body:JSON.stringify({
           username,
           email,
           password
         })
+
       });
 
-      const result=await response.json();
+    const data =
+      await response.json();
 
-      if(!response.ok || !result.success){
+    if(!response.ok || !data.success){
 
-        throw new Error(
-          result.message || "Registration failed."
-        );
-      }
-
-      msg.className="message success";
-      msg.textContent=
-        "✅ Account created! Redirecting to login...";
-
-      setTimeout(()=>{
-        window.location.href="/login.html";
-      },1000);
-
-    }catch(error){
-
-      msg.className="message error";
-      msg.textContent="❌ "+error.message;
-
-      button.disabled=false;
-      button.textContent="👑 Create Account";
+      throw new Error(
+        data.message || "Registration failed."
+      );
     }
 
+    message.style.color="#55ff88";
+
+    message.textContent=
+      "✅ Account created! Redirecting...";
+
+    setTimeout(()=>{
+      window.location.href="/login.html";
+    },1000);
+
+  }catch(error){
+
+    message.style.color="#ff5555";
+
+    message.textContent=
+      "❌ "+error.message;
+
+    button.disabled=false;
+    button.textContent=
+      "👑 CREATE ACCOUNT";
+  }
+
 });
+
 </script>
 
 </body>
