@@ -1,96 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>QUEEN X - Login</title>
+<title>QUEEN X Login</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
 body{
-  background:#070707;
-  color:#fff;
-  font-family:Arial,sans-serif;
+  margin:0;
+  min-height:100vh;
+  background:#050505;
+  color:white;
+  font-family:Arial;
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
-  padding:20px
+  padding:20px;
 }
 
 .box{
-  background:#151515;
-  border:1px solid #2a2a2a;
-  padding:30px;
-  border-radius:20px;
   width:100%;
   max-width:400px;
+  background:#151515;
+  padding:30px;
+  border-radius:20px;
+  border:1px solid #292929;
   text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.6)
 }
 
-h2{font-size:28px;margin-bottom:8px}
+h1{
+  margin-bottom:5px;
+}
 
-.subtitle{
+p{
   color:#777;
   font-size:13px;
-  margin-bottom:25px
 }
 
 input{
   width:100%;
-  padding:14px;
-  margin:8px 0;
-  background:#0d0d0d;
-  border:1px solid #333;
+  box-sizing:border-box;
+  padding:15px;
+  margin:7px 0;
   border-radius:12px;
-  color:#fff;
-  outline:none;
-  font-size:14px
+  border:1px solid #333;
+  background:#090909;
+  color:white;
 }
-
-input:focus{border-color:#55ff88}
 
 button{
   width:100%;
-  padding:14px;
+  padding:15px;
   margin-top:10px;
-  background:#fff;
-  color:#000;
-  font-weight:bold;
   border:0;
   border-radius:12px;
-  cursor:pointer
+  background:white;
+  color:black;
+  font-weight:bold;
 }
 
-button:disabled{
-  opacity:.5;
-  cursor:not-allowed
-}
-
-.register{
-  margin-top:18px;
-  padding-top:18px;
-  border-top:1px solid #292929;
-  color:#777;
-  font-size:13px
-}
-
-.register a{
+a{
   color:#55ff88;
   text-decoration:none;
-  font-weight:bold
 }
 
-.message{
+#message{
   margin-top:15px;
-  font-size:13px
+  font-size:13px;
 }
-
-.error{color:#ff5555}
-.success{color:#55ff88}
 </style>
 </head>
 
@@ -98,36 +76,32 @@ button:disabled{
 
 <div class="box">
 
-  <h2>👑 QUEEN X</h2>
+<h1>👑 QUEEN X</h1>
 
-  <p class="subtitle">
-    Login to your WhatsApp MD dashboard
-  </p>
+<p>Login to your dashboard</p>
 
-  <input
-    id="email"
-    type="email"
-    placeholder="Email address"
-    autocomplete="email"
-  >
+<input
+ id="email"
+ type="email"
+ placeholder="Email"
+>
 
-  <input
-    id="password"
-    type="password"
-    placeholder="Password"
-    autocomplete="current-password"
-  >
+<input
+ id="password"
+ type="password"
+ placeholder="Password"
+>
 
-  <button id="loginButton" onclick="login()">
-    🔐 Login to Dashboard
-  </button>
+<button id="loginBtn" onclick="login()">
+🔐 LOGIN
+</button>
 
-  <div id="msg" class="message"></div>
+<div id="message"></div>
 
-  <div class="register">
-    Don't have an account?
-    <a href="/register.html">Create Account</a>
-  </div>
+<p>
+Don't have an account?
+<a href="/register.html">Register</a>
+</p>
 
 </div>
 
@@ -136,51 +110,64 @@ button:disabled{
 async function login(){
 
   const email =
-    document.getElementById("email").value.trim();
+    document.getElementById("email")
+      .value.trim();
 
   const password =
-    document.getElementById("password").value;
+    document.getElementById("password")
+      .value;
+
+  const message =
+    document.getElementById("message");
 
   const button =
-    document.getElementById("loginButton");
-
-  const msg =
-    document.getElementById("msg");
+    document.getElementById("loginBtn");
 
   if(!email || !password){
 
-    msg.className="message error";
-    msg.textContent="❌ Enter email and password.";
+    message.style.color="#ff5555";
+    message.textContent=
+      "❌ Enter email and password.";
+
     return;
   }
 
   button.disabled=true;
-  button.textContent="⏳ Logging in...";
+  button.textContent="⏳ LOGIN...";
 
   try{
 
-    const response=await fetch("/api/login",{
-      method:"POST",
-      credentials:"same-origin",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        email,
-        password
-      })
-    });
+    const response =
+      await fetch("/api/login",{
 
-    const result=await response.json();
+        method:"POST",
 
-    if(!response.ok || !result.success){
+        credentials:"same-origin",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          email,
+          password
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+    if(!response.ok || !data.success){
+
       throw new Error(
-        result.message || "Login failed."
+        data.message || "Login failed."
       );
     }
 
-    msg.className="message success";
-    msg.textContent="✅ Login successful!";
+    message.style.color="#55ff88";
+    message.textContent=
+      "✅ Login successful.";
 
     setTimeout(()=>{
       window.location.href="/dashboard";
@@ -188,19 +175,14 @@ async function login(){
 
   }catch(error){
 
-    msg.className="message error";
-    msg.textContent="❌ "+error.message;
+    message.style.color="#ff5555";
+    message.textContent=
+      "❌ "+error.message;
 
     button.disabled=false;
-    button.textContent="🔐 Login to Dashboard";
+    button.textContent="🔐 LOGIN";
   }
 }
-
-document.addEventListener("keydown",event=>{
-  if(event.key==="Enter"){
-    login();
-  }
-});
 
 </script>
 
