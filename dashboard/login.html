@@ -1,33 +1,240 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Queen X - Login</title>
+
+<title>QUEEN X - Login</title>
+
 <style>
-body{background:#070707;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.box{background:#151515;border:1px solid #2a2a2a;padding:30px;border-radius:20px;width:90%;max-width:400px;text-align:center}
-input{width:100%;padding:14px;margin:15px 0;background:#0d0d0d;border:1px solid #333;border-radius:12px;color:#fff}
-button{width:100%;padding:14px;background:#fff;color:#000;font-weight:bold;border:0;border-radius:12px;cursor:pointer}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  background:#070707;
+  color:#fff;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:20px;
+}
+
+.box{
+  background:#151515;
+  border:1px solid #2a2a2a;
+  padding:30px;
+  border-radius:20px;
+  width:100%;
+  max-width:400px;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+h2{
+  font-size:28px;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  color:#777;
+  font-size:13px;
+  margin-bottom:25px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  background:#0d0d0d;
+  border:1px solid #333;
+  border-radius:12px;
+  color:#fff;
+  outline:none;
+  font-size:14px;
+}
+
+input:focus{
+  border-color:#55ff88;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  background:#fff;
+  color:#000;
+  font-weight:bold;
+  border:0;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.message{
+  margin-top:15px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.error{
+  color:#ff5555;
+}
+
+.success{
+  color:#55ff88;
+}
+
+.register{
+  margin-top:20px;
+  color:#777;
+  font-size:12px;
+}
 </style>
 </head>
+
 <body>
+
 <div class="box">
-<h2>🔐 QUEEN X</h2>
-<p style="color:#777;font-size:13px;margin-top:8px">Enter Panel PIN to continue</p>
-<input id="pin" type="password" placeholder="Enter PIN (default: 1234)">
-<button onclick="login()">Unlock Dashboard</button>
-<p id="msg" style="color:#ff5555;margin-top:12px;font-size:13px"></p>
+
+  <h2>👑 QUEEN X</h2>
+
+  <p class="subtitle">
+    Login to your WhatsApp MD dashboard
+  </p>
+
+  <input
+    id="email"
+    type="email"
+    placeholder="Email address"
+    autocomplete="email"
+  >
+
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+    autocomplete="current-password"
+  >
+
+  <button id="loginButton" onclick="login()">
+    🔐 Login to Dashboard
+  </button>
+
+  <div id="msg" class="message"></div>
+
+  <div class="register">
+    Use an account already registered with QUEEN X.
+  </div>
+
 </div>
+
 <script>
-function login(){
-  const pin = document.getElementById('pin').value;
-  if(pin === '1234'){ // CHANGE YOUR PIN HERE
-    localStorage.setItem('queenx_auth','true');
-    window.location.href = '/index.html';
-  } else {
-    document.getElementById('msg').textContent = '❌ Wrong PIN! Default is 1234';
+
+async function login(){
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  const button =
+    document.getElementById("loginButton");
+
+  const message =
+    document.getElementById("msg");
+
+  message.textContent = "";
+
+  if(!email || !password){
+
+    message.className = "message error";
+    message.textContent =
+      "❌ Enter your email and password.";
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "⏳ Logging in...";
+
+  try{
+
+    const response = await fetch("/api/login", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      credentials: "same-origin",
+
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok || !data.success){
+
+      throw new Error(
+        data.message || "Login failed."
+      );
+
+    }
+
+    message.className = "message success";
+    message.textContent =
+      "✅ Login successful. Opening dashboard...";
+
+    /*
+      Give the browser a moment to receive
+      and store the session cookie.
+    */
+
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 500);
+
+  }catch(error){
+
+    console.error("Login error:", error);
+
+    message.className = "message error";
+    message.textContent =
+      "❌ " + error.message;
+
+    button.disabled = false;
+    button.textContent =
+      "🔐 Login to Dashboard";
   }
 }
+
+/*
+  Allow pressing ENTER to login.
+*/
+
+document.addEventListener("keydown", event => {
+
+  if(event.key === "Enter"){
+    login();
+  }
+
+});
+
 </script>
+
 </body>
 </html>
