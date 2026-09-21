@@ -1,11 +1,11 @@
 {
   "name": "queen-x",
   "version": "1.0.0",
-  "description": "Queen X WhatsApp MD Bot with authenticated HTML Dashboard",
-  "main": "index.js",
+  "description": "Queen X WhatsApp MD Bot with authenticated dashboard",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "engines": {
     "node": ">=18"
