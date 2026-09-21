@@ -7,21 +7,17 @@
 <title>QUEEN X - Login</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+*{box-sizing:border-box;margin:0;padding:0}
 
 body{
   background:#070707;
   color:#fff;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   display:flex;
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  padding:20px;
+  padding:20px
 }
 
 .box{
@@ -32,18 +28,15 @@ body{
   width:100%;
   max-width:400px;
   text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  box-shadow:0 20px 60px rgba(0,0,0,.6)
 }
 
-h2{
-  font-size:28px;
-  margin-bottom:8px;
-}
+h2{font-size:28px;margin-bottom:8px}
 
 .subtitle{
   color:#777;
   font-size:13px;
-  margin-bottom:25px;
+  margin-bottom:25px
 }
 
 input{
@@ -55,12 +48,10 @@ input{
   border-radius:12px;
   color:#fff;
   outline:none;
-  font-size:14px;
+  font-size:14px
 }
 
-input:focus{
-  border-color:#55ff88;
-}
+input:focus{border-color:#55ff88}
 
 button{
   width:100%;
@@ -71,34 +62,35 @@ button{
   font-weight:bold;
   border:0;
   border-radius:12px;
-  cursor:pointer;
-  font-size:14px;
+  cursor:pointer
 }
 
 button:disabled{
   opacity:.5;
-  cursor:not-allowed;
+  cursor:not-allowed
+}
+
+.register{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid #292929;
+  color:#777;
+  font-size:13px
+}
+
+.register a{
+  color:#55ff88;
+  text-decoration:none;
+  font-weight:bold
 }
 
 .message{
   margin-top:15px;
-  font-size:13px;
-  line-height:1.5;
+  font-size:13px
 }
 
-.error{
-  color:#ff5555;
-}
-
-.success{
-  color:#55ff88;
-}
-
-.register{
-  margin-top:20px;
-  color:#777;
-  font-size:12px;
-}
+.error{color:#ff5555}
+.success{color:#55ff88}
 </style>
 </head>
 
@@ -133,7 +125,8 @@ button:disabled{
   <div id="msg" class="message"></div>
 
   <div class="register">
-    Use an account already registered with QUEEN X.
+    Don't have an account?
+    <a href="/register.html">Create Account</a>
   </div>
 
 </div>
@@ -151,87 +144,62 @@ async function login(){
   const button =
     document.getElementById("loginButton");
 
-  const message =
+  const msg =
     document.getElementById("msg");
-
-  message.textContent = "";
 
   if(!email || !password){
 
-    message.className = "message error";
-    message.textContent =
-      "❌ Enter your email and password.";
-
+    msg.className="message error";
+    msg.textContent="❌ Enter email and password.";
     return;
   }
 
-  button.disabled = true;
-  button.textContent = "⏳ Logging in...";
+  button.disabled=true;
+  button.textContent="⏳ Logging in...";
 
   try{
 
-    const response = await fetch("/api/login", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
+    const response=await fetch("/api/login",{
+      method:"POST",
+      credentials:"same-origin",
+      headers:{
+        "Content-Type":"application/json"
       },
-
-      credentials: "same-origin",
-
-      body: JSON.stringify({
-        email: email,
-        password: password
+      body:JSON.stringify({
+        email,
+        password
       })
     });
 
-    const data = await response.json();
+    const result=await response.json();
 
-    if(!response.ok || !data.success){
-
+    if(!response.ok || !result.success){
       throw new Error(
-        data.message || "Login failed."
+        result.message || "Login failed."
       );
-
     }
 
-    message.className = "message success";
-    message.textContent =
-      "✅ Login successful. Opening dashboard...";
+    msg.className="message success";
+    msg.textContent="✅ Login successful!";
 
-    /*
-      Give the browser a moment to receive
-      and store the session cookie.
-    */
-
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 500);
+    setTimeout(()=>{
+      window.location.href="/dashboard";
+    },500);
 
   }catch(error){
 
-    console.error("Login error:", error);
+    msg.className="message error";
+    msg.textContent="❌ "+error.message;
 
-    message.className = "message error";
-    message.textContent =
-      "❌ " + error.message;
-
-    button.disabled = false;
-    button.textContent =
-      "🔐 Login to Dashboard";
+    button.disabled=false;
+    button.textContent="🔐 Login to Dashboard";
   }
 }
 
-/*
-  Allow pressing ENTER to login.
-*/
-
-document.addEventListener("keydown", event => {
-
-  if(event.key === "Enter"){
+document.addEventListener("keydown",event=>{
+  if(event.key==="Enter"){
     login();
   }
-
 });
 
 </script>
