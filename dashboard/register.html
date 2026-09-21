@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
 
 <title>QUEEN X Register</title>
 
 <style>
+
 body{
   margin:0;
   min-height:100vh;
@@ -27,6 +34,15 @@ body{
   border-radius:20px;
   border:1px solid #292929;
   text-align:center;
+}
+
+h1{
+  margin-bottom:5px;
+}
+
+p{
+  color:#777;
+  font-size:13px;
 }
 
 input{
@@ -51,6 +67,10 @@ button{
   font-weight:bold;
 }
 
+button:disabled{
+  opacity:.5;
+}
+
 a{
   color:#55ff88;
   text-decoration:none;
@@ -60,7 +80,9 @@ a{
   margin-top:15px;
   font-size:13px;
 }
+
 </style>
+
 </head>
 
 <body>
@@ -69,39 +91,43 @@ a{
 
 <h1>👑 QUEEN X</h1>
 
-<p>Create your account</p>
+<p>Create your dashboard account</p>
 
 <form id="registerForm">
 
 <input
- id="username"
- placeholder="Username"
- required
+  id="username"
+  type="text"
+  placeholder="Username"
+  required
 >
 
 <input
- id="email"
- type="email"
- placeholder="Email"
- required
+  id="email"
+  type="email"
+  placeholder="Email"
+  required
 >
 
 <input
- id="password"
- type="password"
- placeholder="Password"
- required
+  id="password"
+  type="password"
+  placeholder="Password"
+  required
 >
 
 <input
- id="confirmPassword"
- type="password"
- placeholder="Confirm password"
- required
+  id="confirmPassword"
+  type="password"
+  placeholder="Confirm Password"
+  required
 >
 
-<button id="registerBtn">
-👑 CREATE ACCOUNT
+<button
+  id="registerBtn"
+  type="submit"
+>
+📝 CREATE ACCOUNT
 </button>
 
 </form>
@@ -109,108 +135,169 @@ a{
 <div id="message"></div>
 
 <p>
-Already registered?
-<a href="/login.html">Login</a>
+Already have an account?
+<a href="/login.html">
+Login
+</a>
 </p>
 
 </div>
 
+
 <script>
 
 document
-.getElementById("registerForm")
-.addEventListener("submit", async event => {
+  .getElementById(
+    "registerForm"
+  )
+  .addEventListener(
+    "submit",
+    async function(event){
 
-  event.preventDefault();
+      event.preventDefault();
 
-  const username =
-    document.getElementById("username")
-      .value.trim();
+      const username =
+        document
+          .getElementById(
+            "username"
+          )
+          .value
+          .trim();
 
-  const email =
-    document.getElementById("email")
-      .value.trim();
+      const email =
+        document
+          .getElementById(
+            "email"
+          )
+          .value
+          .trim();
 
-  const password =
-    document.getElementById("password")
-      .value;
+      const password =
+        document
+          .getElementById(
+            "password"
+          )
+          .value;
 
-  const confirmPassword =
-    document.getElementById("confirmPassword")
-      .value;
+      const confirmPassword =
+        document
+          .getElementById(
+            "confirmPassword"
+          )
+          .value;
 
-  const message =
-    document.getElementById("message");
+      const message =
+        document.getElementById(
+          "message"
+        );
 
-  const button =
-    document.getElementById("registerBtn");
+      const button =
+        document.getElementById(
+          "registerBtn"
+        );
 
-  if(password !== confirmPassword){
 
-    message.style.color="#ff5555";
-    message.textContent=
-      "❌ Passwords do not match.";
+      if(
+        password !==
+        confirmPassword
+      ){
 
-    return;
-  }
+        message.style.color =
+          "#ff5555";
 
-  button.disabled=true;
-  button.textContent=
-    "⏳ CREATING...";
+        message.textContent =
+          "❌ Passwords do not match.";
 
-  try{
+        return;
 
-    const response =
-      await fetch("/api/register",{
+      }
 
-        method:"POST",
 
-        headers:{
-          "Content-Type":"application/json"
-        },
+      button.disabled =
+        true;
 
-        body:JSON.stringify({
-          username,
-          email,
-          password
-        })
+      button.textContent =
+        "⏳ CREATING...";
 
-      });
 
-    const data =
-      await response.json();
+      try{
 
-    if(!response.ok || !data.success){
+        const response =
+          await fetch(
+            "/api/register",
+            {
+              method:"POST",
+              headers:{
+                "Content-Type":
+                  "application/json"
+              },
+              body:
+                JSON.stringify({
+                  username,
+                  email,
+                  password
+                })
+            }
+          );
 
-      throw new Error(
-        data.message || "Registration failed."
-      );
+
+        const data =
+          await response.json();
+
+
+        if(
+          !response.ok ||
+          !data.success
+        ){
+
+          throw new Error(
+            data.message ||
+            "Registration failed."
+          );
+
+        }
+
+
+        message.style.color =
+          "#55ff88";
+
+        message.textContent =
+          "✅ Account created successfully!";
+
+
+        setTimeout(
+          () => {
+
+            window.location.href =
+              "/login.html";
+
+          },
+          700
+        );
+
+
+      }catch(error){
+
+        message.style.color =
+          "#ff5555";
+
+        message.textContent =
+          "❌ " +
+          error.message;
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          "📝 CREATE ACCOUNT";
+
+      }
+
     }
-
-    message.style.color="#55ff88";
-
-    message.textContent=
-      "✅ Account created! Redirecting...";
-
-    setTimeout(()=>{
-      window.location.href="/login.html";
-    },1000);
-
-  }catch(error){
-
-    message.style.color="#ff5555";
-
-    message.textContent=
-      "❌ "+error.message;
-
-    button.disabled=false;
-    button.textContent=
-      "👑 CREATE ACCOUNT";
-  }
-
-});
+  );
 
 </script>
 
 </body>
+
 </html>
