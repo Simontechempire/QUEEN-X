@@ -7,11 +7,7 @@
 <title>QUEEN X - Dashboard</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+*{box-sizing:border-box;margin:0;padding:0}
 
 body{
   min-height:100vh;
@@ -20,22 +16,22 @@ body{
   color:#fff;
   display:flex;
   justify-content:center;
-  padding:20px;
+  padding:20px
 }
 
 .dashboard{
   width:100%;
   max-width:480px;
-  background:linear-gradient(180deg,#151515 0%,#0f0f0f 100%);
+  background:linear-gradient(180deg,#151515,#0f0f0f);
   border:1px solid #2a2a2a;
   border-radius:28px;
   padding:28px;
-  box-shadow:0 30px 80px rgba(0,0,0,.7);
+  box-shadow:0 30px 80px rgba(0,0,0,.7)
 }
 
 .header{
   text-align:center;
-  margin-bottom:28px;
+  margin-bottom:28px
 }
 
 .header h1{
@@ -43,14 +39,13 @@ body{
   letter-spacing:2px;
   background:linear-gradient(90deg,#fff,#888);
   -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-text-fill-color:transparent
 }
 
 .header p{
   color:#777;
   font-size:13px;
-  margin-top:6px;
-  letter-spacing:1px;
+  margin-top:6px
 }
 
 .badge{
@@ -61,41 +56,39 @@ body{
   border-radius:20px;
   font-size:11px;
   color:#55ff88;
-  margin-top:12px;
+  margin-top:12px
 }
 
-.status,
-.card{
+.status,.card{
   background:#171717;
   border:1px solid #262626;
   border-radius:18px;
   padding:20px;
-  margin-bottom:16px;
+  margin-bottom:16px
 }
 
 .status-title{
   color:#666;
   font-size:11px;
-  letter-spacing:1px;
-  margin-bottom:6px;
+  margin-bottom:6px
 }
 
 .online{
   color:#55ff88;
   font-weight:bold;
-  font-size:14px;
+  font-size:14px
 }
 
 .card h2{
   font-size:16px;
-  margin-bottom:8px;
+  margin-bottom:8px
 }
 
 .card p{
   color:#888;
   font-size:13px;
   margin-bottom:14px;
-  line-height:1.5;
+  line-height:1.5
 }
 
 input{
@@ -106,12 +99,7 @@ input{
   border-radius:14px;
   color:#fff;
   outline:none;
-  font-size:15px;
-}
-
-input:focus{
-  border-color:#55ff88;
-  box-shadow:0 0 0 3px rgba(85,255,136,.1);
+  font-size:15px
 }
 
 button{
@@ -123,35 +111,18 @@ button{
   background:#fff;
   color:#000;
   font-weight:800;
-  cursor:pointer;
-  font-size:14px;
-  letter-spacing:.5px;
-  transition:.2s;
-}
-
-button:hover{
-  transform:translateY(-1px);
-  box-shadow:0 10px 20px rgba(255,255,255,.1);
-}
-
-button:active{
-  transform:translateY(0);
+  cursor:pointer
 }
 
 button:disabled{
   opacity:.5;
-  cursor:not-allowed;
-  transform:none;
+  cursor:not-allowed
 }
 
 .secondary{
   background:#222;
   color:#fff;
-  border:1px solid #333;
-}
-
-.secondary:hover{
-  background:#2a2a2a;
+  border:1px solid #333
 }
 
 .result{
@@ -160,7 +131,7 @@ button:disabled{
   border-radius:14px;
   background:#0d0d0d;
   border:1px dashed #333;
-  display:none;
+  display:none
 }
 
 .pair-code{
@@ -172,70 +143,29 @@ button:disabled{
   padding:14px;
   border-radius:12px;
   margin:12px 0;
-  border:1px solid #55ff8844;
-  text-align:center;
-}
-
-.timer{
-  font-size:12px;
-  color:#ffaa55;
-  margin-top:8px;
-  text-align:center;
-}
-
-.actions{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
-}
-
-.actions button{
-  padding:10px;
-  font-size:12px;
-  margin-top:0;
+  text-align:center
 }
 
 .message{
   color:#aaa;
   font-size:13px;
-  line-height:1.6;
+  line-height:1.6
 }
 
-.error{
-  color:#ff5a5a;
-}
+.error{color:#ff5a5a}
+.success{color:#55ff88}
 
-.success{
-  color:#55ff88;
+.user-info{
+  color:#777;
+  font-size:12px;
+  margin-top:8px
 }
 
 .footer{
   text-align:center;
   color:#444;
   font-size:11px;
-  margin-top:24px;
-}
-
-.dot{
-  display:inline-block;
-  width:8px;
-  height:8px;
-  background:#55ff88;
-  border-radius:50%;
-  box-shadow:0 0 10px #55ff88;
-  margin-right:6px;
-  animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
-  0%,100%{opacity:1}
-  50%{opacity:.5}
-}
-
-.user-info{
-  color:#777;
-  font-size:12px;
-  margin-top:8px;
+  margin-top:24px
 }
 </style>
 </head>
@@ -246,132 +176,114 @@ button:disabled{
 
 <header class="header">
 
-  <h1>QUEEN X</h1>
+<h1>QUEEN X</h1>
 
-  <p>WHATSAPP MD • ULTRA</p>
+<p>WHATSAPP MD • ULTRA</p>
 
-  <div class="badge">
-    <span class="dot"></span>
-    SYSTEM ONLINE
-  </div>
+<div class="badge">
+  🟢 SYSTEM ONLINE
+</div>
 
-  <div id="userInfo" class="user-info">
-    Loading account...
-  </div>
+<div id="userInfo" class="user-info">
+  Checking login...
+</div>
 
 </header>
 
 
-<!-- STATUS -->
-
 <section class="status">
 
-  <div class="status-title">
-    BOT STATUS
-  </div>
+<div class="status-title">
+BOT STATUS
+</div>
 
-  <div class="online">
-    ● Connected to Server • Ready to Pair
-  </div>
-
-</section>
-
-
-<!-- PAIR WHATSAPP -->
-
-<section class="card">
-
-  <h2>📱 Link WhatsApp</h2>
-
-  <p>
-    Enter your number with country code.
-    No + or spaces.
-    Example: 2348123456789
-  </p>
-
-  <input
-    id="phone"
-    type="tel"
-    inputmode="numeric"
-    placeholder="234xxxxxxxxxx"
-    maxlength="15"
-  >
-
-  <button
-    id="pairButton"
-    onclick="pairWhatsApp()"
-  >
-    🔗 Generate Pair Code
-  </button>
-
-  <div
-    id="pairResult"
-    class="result"
-  ></div>
+<div class="online">
+● Connected to Server • Ready to Pair
+</div>
 
 </section>
 
 
-<!-- SESSION CONTROL -->
-
 <section class="card">
 
-  <h2>🔐 Session Control</h2>
+<h2>📱 Link WhatsApp</h2>
 
-  <p>
-    Check your dashboard session or logout.
-  </p>
+<p>
+Enter your number with country code.
+No + or spaces.
+Example: 2348123456789
+</p>
 
-  <div style="display:flex;gap:8px">
+<input
+  id="phone"
+  type="tel"
+  inputmode="numeric"
+  placeholder="234xxxxxxxxxx"
+  maxlength="15"
+>
 
-    <button
-      class="secondary"
-      onclick="sessionInfo()"
-      style="flex:1"
-    >
-      Check Status
-    </button>
+<button id="pairButton" onclick="pairWhatsApp()">
+🔗 Generate Pair Code
+</button>
 
-    <button
-      class="secondary"
-      onclick="logout()"
-      style="flex:1;background:#331111;color:#ff6666;border-color:#552222"
-    >
-      Logout
-    </button>
-
-  </div>
-
-  <div
-    id="sessionResult"
-    class="result"
-  ></div>
+<div id="pairResult" class="result"></div>
 
 </section>
 
 
-<!-- BOT FEATURES -->
+<section class="card">
+
+<h2>🔐 Session Control</h2>
+
+<p>
+Check your account session or logout.
+</p>
+
+<div style="display:flex;gap:8px">
+
+<button
+  class="secondary"
+  onclick="sessionInfo()"
+  style="flex:1"
+>
+Check Status
+</button>
+
+<button
+  class="secondary"
+  onclick="logout()"
+  style="flex:1"
+>
+Logout
+</button>
+
+</div>
+
+<div id="sessionResult" class="result"></div>
+
+</section>
+
 
 <section class="card">
 
-  <h2>⚙️ Bot Features</h2>
+<h2>⚙️ Bot Features</h2>
 
-  <p>
-    Your Queen X WhatsApp MD dashboard is active.
-  </p>
+<p>
+Your Queen X WhatsApp MD dashboard is active.
+</p>
 
-  <button
-    class="secondary"
-    onclick="alert('Bot Controls coming soon.')"
-  >
-    Open Controls
-  </button>
+<button
+  class="secondary"
+  onclick="alert('Bot controls coming soon.')"
+>
+Open Controls
+</button>
 
 </section>
 
 
 <div class="footer">
-  QUEEN X V2 • Upgraded by Simon Tech • 2026
+QUEEN X V2 • Upgraded by Simon Tech • 2026
 </div>
 
 </main>
@@ -379,12 +291,8 @@ button:disabled{
 
 <script>
 
-let countdownInterval;
+let timer;
 
-
-/* ═══════════════════════════════════════
-   HTML ESCAPE
-═══════════════════════════════════════ */
 
 function escapeHtml(value){
 
@@ -394,63 +302,51 @@ function escapeHtml(value){
     .replace(/>/g,"&gt;")
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
-
 }
 
 
-/* ═══════════════════════════════════════
-   CHECK LOGIN SESSION
-═══════════════════════════════════════ */
-
+// CHECK LOGIN
 async function loadUser(){
 
   try{
 
-    const response = await fetch("/api/me",{
-      method:"GET",
+    const response=await fetch("/api/me",{
       credentials:"same-origin"
     });
 
-    if(response.status === 401){
+    if(response.status===401){
 
       window.location.href="/login.html";
       return;
     }
 
-    const data = await response.json();
+    const data=await response.json();
 
-    if(!response.ok || !data.success){
+    if(!data.success){
 
       window.location.href="/login.html";
       return;
     }
 
     document.getElementById("userInfo").textContent =
-      "👤 Logged in as " +
-      data.user.username +
-      " • " +
-      data.user.email;
+      "👤 "+data.user.username+
+      " • "+data.user.email;
 
   }catch(error){
 
-    console.error("Session check error:",error);
-
-    document.getElementById("userInfo").textContent =
-      "⚠️ Unable to verify session";
-
+    window.location.href="/login.html";
   }
-
 }
 
 
-/* ═══════════════════════════════════════
-   PAIR WHATSAPP
-═══════════════════════════════════════ */
-
+// PAIR
 async function pairWhatsApp(){
 
-  const phoneEl =
-    document.getElementById("phone");
+  const phone =
+    document.getElementById("phone")
+      .value
+      .trim()
+      .replace(/\D/g,"");
 
   const button =
     document.getElementById("pairButton");
@@ -458,235 +354,141 @@ async function pairWhatsApp(){
   const result =
     document.getElementById("pairResult");
 
-
-  const phone =
-    phoneEl.value
-      .trim()
-      .replace(/[^0-9]/g,"");
-
-
-  if(phone.length < 10){
+  if(phone.length<10){
 
     result.style.display="block";
-
-    result.innerHTML =
-      '<div class="error">❌ Enter a valid number. Example: 2348123456789</div>';
+    result.innerHTML=
+      '<div class="error">❌ Enter a valid WhatsApp number.</div>';
 
     return;
-
   }
 
-
   button.disabled=true;
-
-  button.textContent =
-    "⏳ Requesting Code...";
-
+  button.textContent="⏳ Requesting Code...";
 
   result.style.display="block";
-
-  result.innerHTML =
-    '<div class="message">⏳ Connecting to WhatsApp... Please wait.</div>';
-
+  result.innerHTML=
+    '<div class="message">⏳ Generating pairing code...</div>';
 
   try{
 
-    const response = await fetch("/api/pair",{
-
+    const response=await fetch("/api/pair",{
       method:"POST",
-
       credentials:"same-origin",
-
       headers:{
         "Content-Type":"application/json"
       },
-
-      body:JSON.stringify({
-        phone:phone
-      })
-
+      body:JSON.stringify({phone})
     });
 
+    const data=await response.json();
 
-    const data = await response.json();
-
-
-    /*
-      If the session expired,
-      return the user to login.
-    */
-
-    if(response.status === 401){
+    if(response.status===401){
 
       window.location.href="/login.html";
       return;
-
     }
-
 
     if(!response.ok || !data.success){
 
       throw new Error(
-        data.message || "Failed to generate pairing code."
+        data.message || "Pairing failed."
       );
-
     }
 
+    const code=String(
+      data.code || data.pairingCode || ""
+    ).replace(/-/g,"");
 
-    const rawCode =
-      String(data.code || data.pairingCode || "")
-        .replace(/-/g,"")
-        .trim();
-
-
-    if(!rawCode){
+    if(!code){
 
       throw new Error(
-        "Server returned an empty pairing code."
+        "No pairing code was returned by the server."
       );
-
     }
 
-
     const formatted =
-      rawCode.match(/.{1,4}/g)?.join("-") ||
-      rawCode;
+      code.match(/.{1,4}/g)?.join("-") || code;
 
-
-    result.innerHTML = `
+    result.innerHTML=`
 
       <div class="success">
         ✅ Pairing Code Generated!
       </div>
 
-      <div
-        class="pair-code"
-        id="codeText"
-      >
+      <div class="pair-code" id="codeText">
         ${escapeHtml(formatted)}
       </div>
 
-      <div
-        class="timer"
-        id="timer"
-      >
-        ⏰ Expires in 60s
-      </div>
-
       <div class="message">
-        Open WhatsApp → Settings → Linked Devices
-        → Link with phone number → Enter the code.
+        WhatsApp → Settings → Linked Devices
+        → Link with phone number → Enter this code.
       </div>
 
-      <div class="actions">
-
-        <button onclick="copyCode()">
-          📋 Copy Code
-        </button>
-
-        <button
-          class="secondary"
-          onclick="pairWhatsApp()"
-        >
-          🔄 New Code
-        </button>
-
-      </div>
+      <button onclick="copyCode()">
+        📋 Copy Code
+      </button>
 
     `;
 
-
     startTimer(60);
-
 
   }catch(error){
 
-    console.error("Pairing error:",error);
-
-    result.innerHTML =
-      '<div class="error">❌ ' +
-      escapeHtml(error.message) +
+    result.innerHTML=
+      '<div class="error">❌ '+
+      escapeHtml(error.message)+
       '</div>';
-
 
   }finally{
 
     button.disabled=false;
-
-    button.textContent =
-      "🔗 Generate Pair Code";
-
+    button.textContent="🔗 Generate Pair Code";
   }
-
 }
 
 
-/* ═══════════════════════════════════════
-   COUNTDOWN
-═══════════════════════════════════════ */
-
+// TIMER
 function startTimer(seconds){
 
-  const element =
-    document.getElementById("timer");
+  clearInterval(timer);
 
-  if(!element) return;
+  const result=document.getElementById("pairResult");
 
-  clearInterval(countdownInterval);
+  let remaining=seconds;
 
-  let remaining = seconds;
+  timer=setInterval(()=>{
 
+    remaining--;
 
-  countdownInterval =
-    setInterval(()=>{
+    if(remaining<=0){
 
-      remaining--;
+      clearInterval(timer);
 
-      if(element){
+      const timerText=document.createElement("div");
 
-        element.textContent =
-          "⏰ Expires in " +
-          remaining +
-          "s";
+      timerText.className="message error";
+      timerText.textContent=
+        "❌ Pairing code expired.";
 
-      }
+      result.appendChild(timerText);
 
+    }
 
-      if(remaining <= 0){
-
-        clearInterval(countdownInterval);
-
-        if(element){
-
-          element.textContent =
-            "❌ Code expired, generate a new one";
-
-        }
-
-      }
-
-    },1000);
-
+  },1000);
 }
 
 
-/* ═══════════════════════════════════════
-   COPY CODE
-═══════════════════════════════════════ */
-
+// COPY
 async function copyCode(){
 
-  const element =
-    document.getElementById("codeText");
+  const element=document.getElementById("codeText");
 
-  if(!element) return;
+  if(!element)return;
 
-
-  const code =
-    element.textContent
-      .replace(/-/g,"")
-      .trim();
-
+  const code=element.textContent
+    .replace(/-/g,"")
+    .trim();
 
   try{
 
@@ -694,171 +496,91 @@ async function copyCode(){
 
     alert("✅ Pairing code copied.");
 
-  }catch(error){
+  }catch{
 
-    alert("Copy failed. Code: " + code);
-
+    alert("Pairing code: "+code);
   }
-
 }
 
 
-/* ═══════════════════════════════════════
-   SESSION INFORMATION
-═══════════════════════════════════════ */
-
+// SESSION
 async function sessionInfo(){
 
-  const result =
+  const result=
     document.getElementById("sessionResult");
 
   result.style.display="block";
 
-  result.innerHTML =
-    '<div class="message">⏳ Checking session...</div>';
-
+  result.innerHTML=
+    '<div class="message">⏳ Checking...</div>';
 
   try{
 
-    const response = await fetch(
-      "/api/session",
-      {
-        method:"GET",
-        credentials:"same-origin"
-      }
-    );
+    const response=await fetch("/api/session",{
+      credentials:"same-origin"
+    });
 
-
-    if(response.status === 401){
+    if(response.status===401){
 
       window.location.href="/login.html";
       return;
-
     }
 
+    const data=await response.json();
 
-    const data =
-      await response.json();
-
-
-    if(!response.ok || !data.success){
-
-      throw new Error(
-        data.message || "Unable to check session."
-      );
-
-    }
-
-
-    result.innerHTML = `
+    result.innerHTML=`
 
       <div class="success">
-        ✅ Dashboard session active
+        ✅ Session active
       </div>
 
       <div class="message">
-
-        👤 User:
-        <strong>
-          ${escapeHtml(data.user.username)}
-        </strong>
-
+        👤 ${escapeHtml(data.user.username)}
         <br>
-
-        📧 Email:
-        ${escapeHtml(data.user.email)}
-
-        <br>
-
-        📱 WhatsApp:
-        ${escapeHtml(
-          typeof data.whatsapp === "string"
-            ? data.whatsapp
-            : JSON.stringify(data.whatsapp)
-        )}
-
+        📧 ${escapeHtml(data.user.email)}
       </div>
 
     `;
 
-
   }catch(error){
 
-    result.innerHTML =
-      '<div class="error">❌ ' +
-      escapeHtml(error.message) +
+    result.innerHTML=
+      '<div class="error">❌ '+
+      escapeHtml(error.message)+
       '</div>';
-
   }
-
 }
 
 
-/* ═══════════════════════════════════════
-   LOGOUT
-═══════════════════════════════════════ */
-
+// LOGOUT
 async function logout(){
 
-  if(!confirm("Logout from Queen X dashboard?")){
-
-    return;
-
-  }
-
-
-  const result =
-    document.getElementById("sessionResult");
-
-  result.style.display="block";
-
-  result.innerHTML =
-    '<div class="message">⏳ Logging out...</div>';
-
+  if(!confirm("Logout from Queen X?"))return;
 
   try{
 
-    const response =
-      await fetch(
-        "/api/logout",
-        {
-          method:"POST",
-          credentials:"same-origin"
-        }
-      );
+    const response=await fetch("/api/logout",{
+      method:"POST",
+      credentials:"same-origin"
+    });
 
+    const data=await response.json();
 
-    const data =
-      await response.json();
+    if(data.success){
 
+      window.location.href="/login.html";
 
-    if(!response.ok || !data.success){
+    }else{
 
-      throw new Error(
-        data.message || "Logout failed."
-      );
-
+      alert(data.message || "Logout failed.");
     }
-
-
-    window.location.href="/login.html";
-
 
   }catch(error){
 
-    result.innerHTML =
-      '<div class="error">❌ ' +
-      escapeHtml(error.message) +
-      '</div>';
-
+    alert("Logout failed.");
   }
-
 }
 
-
-/* ═══════════════════════════════════════
-   START
-═══════════════════════════════════════ */
 
 loadUser();
 
