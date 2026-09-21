@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7,12 +7,16 @@
 <title>QUEEN X Login</title>
 
 <style>
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   min-height:100vh;
   background:#050505;
-  color:white;
-  font-family:Arial;
+  color:#fff;
+  font-family:Arial,sans-serif;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -27,10 +31,12 @@ body{
   border-radius:20px;
   border:1px solid #292929;
   text-align:center;
+  box-shadow:0 25px 70px rgba(0,0,0,.6);
 }
 
 h1{
-  margin-bottom:5px;
+  margin:0 0 5px;
+  font-size:32px;
 }
 
 p{
@@ -40,13 +46,18 @@ p{
 
 input{
   width:100%;
-  box-sizing:border-box;
   padding:15px;
   margin:7px 0;
   border-radius:12px;
   border:1px solid #333;
   background:#090909;
   color:white;
+  outline:none;
+  font-size:14px;
+}
+
+input:focus{
+  border-color:#55ff88;
 }
 
 button{
@@ -58,6 +69,12 @@ button{
   background:white;
   color:black;
   font-weight:bold;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
 }
 
 a{
@@ -68,6 +85,19 @@ a{
 #message{
   margin-top:15px;
   font-size:13px;
+  line-height:1.5;
+}
+
+.loading{
+  color:#ffaa55;
+}
+
+.success{
+  color:#55ff88;
+}
+
+.error{
+  color:#ff5555;
 }
 </style>
 </head>
@@ -76,32 +106,37 @@ a{
 
 <div class="box">
 
-<h1>👑 QUEEN X</h1>
+  <h1>👑 QUEEN X</h1>
 
-<p>Login to your dashboard</p>
+  <p>Login to your dashboard</p>
 
-<input
- id="email"
- type="email"
- placeholder="Email"
->
+  <input
+    id="email"
+    type="email"
+    autocomplete="email"
+    placeholder="Email"
+  >
 
-<input
- id="password"
- type="password"
- placeholder="Password"
->
+  <input
+    id="password"
+    type="password"
+    autocomplete="current-password"
+    placeholder="Password"
+  >
 
-<button id="loginBtn" onclick="login()">
-🔐 LOGIN
-</button>
+  <button
+    id="loginBtn"
+    onclick="login()"
+  >
+    🔐 LOGIN
+  </button>
 
-<div id="message"></div>
+  <div id="message"></div>
 
-<p>
-Don't have an account?
-<a href="/register.html">Register</a>
-</p>
+  <p>
+    Don't have an account?
+    <a href="/register.html">Create Account</a>
+  </p>
 
 </div>
 
@@ -109,13 +144,11 @@ Don't have an account?
 
 async function login(){
 
-  const email =
-    document.getElementById("email")
-      .value.trim();
+  const emailInput =
+    document.getElementById("email");
 
-  const password =
-    document.getElementById("password")
-      .value;
+  const passwordInput =
+    document.getElementById("password");
 
   const message =
     document.getElementById("message");
@@ -123,65 +156,140 @@ async function login(){
   const button =
     document.getElementById("loginBtn");
 
-  if(!email || !password){
 
-    message.style.color="#ff5555";
+  const email =
+    emailInput.value.trim().toLowerCase();
+
+  const password =
+    passwordInput.value;
+
+
+  message.className="";
+  message.textContent="";
+
+
+  if(!email){
+
+    message.className="error";
     message.textContent=
-      "❌ Enter email and password.";
+      "❌ Enter your email.";
 
+    emailInput.focus();
     return;
   }
 
+
+  if(!password){
+
+    message.className="error";
+    message.textContent=
+      "❌ Enter your password.";
+
+    passwordInput.focus();
+    return;
+  }
+
+
   button.disabled=true;
-  button.textContent="⏳ LOGIN...";
+  button.textContent=
+    "⏳ LOGIN...";
+
+  message.className="loading";
+  message.textContent=
+    "⏳ Checking your account...";
+
 
   try{
 
     const response =
-      await fetch("/api/login",{
+      await fetch(
+        "/api/login",
+        {
+          method:"POST",
 
-        method:"POST",
+          credentials:"include",
 
-        credentials:"same-origin",
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-        headers:{
-          "Content-Type":"application/json"
-        },
+          body:JSON.stringify({
+            email:email,
+            password:password
+          })
+        }
+      );
 
-        body:JSON.stringify({
-          email,
-          password
-        })
 
-      });
+    let data;
 
-    const data =
-      await response.json();
+    try{
 
-    if(!response.ok || !data.success){
+      data =
+        await response.json();
+
+    }catch{
 
       throw new Error(
-        data.message || "Login failed."
+        "Server returned an invalid response."
+      );
+
+    }
+
+
+    if(
+      !response.ok ||
+      !data.success
+    ){
+
+      throw new Error(
+        data.message ||
+        "Invalid email or password."
       );
     }
 
-    message.style.color="#55ff88";
-    message.textContent=
-      "✅ Login successful.";
 
-    setTimeout(()=>{
-      window.location.href="/dashboard";
-    },500);
+    message.className="success";
+    message.textContent=
+      "✅ Login successful! Opening dashboard...";
+
+
+    setTimeout(
+      () => {
+
+        window.location.replace(
+          "/dashboard"
+        );
+
+      },
+      500
+    );
+
 
   }catch(error){
 
-    message.style.color="#ff5555";
+    console.error(
+      "LOGIN ERROR:",
+      error
+    );
+
+
+    message.className="error";
     message.textContent=
-      "❌ "+error.message;
+      "❌ " +
+      (
+        error.message ||
+        "Login failed."
+      );
+
 
     button.disabled=false;
-    button.textContent="🔐 LOGIN";
+
+    button.textContent=
+      "🔐 LOGIN";
   }
+
 }
 
 </script>
