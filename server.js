@@ -18,10 +18,6 @@ const PORT = process.env.PORT || 3000;
 const dataDir = path.join(__dirname, "data");
 const USERS_FILE = path.join(dataDir, "users.json");
 
-// ═══════════════════════════════════════
-// DATA SETUP
-// ═══════════════════════════════════════
-
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -30,10 +26,6 @@ if (!fs.existsSync(USERS_FILE)) {
   fs.writeFileSync(USERS_FILE, "[]", "utf8");
 }
 
-// ═══════════════════════════════════════
-// MIDDLEWARE
-// ═══════════════════════════════════════
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -41,7 +33,7 @@ app.set("trust proxy", 1);
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "queen-x-change-this-secret",
+    secret: process.env.SESSION_SECRET || "queen-x-secret-change-this",
     resave: false,
     saveUninitialized: false,
     rolling: true,
@@ -56,15 +48,11 @@ app.use(
 
 app.use(express.static(path.join(__dirname, "dashboard")));
 
-// ═══════════════════════════════════════
-// USER DATABASE
-// ═══════════════════════════════════════
-
 function getUsers() {
   try {
     return JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
   } catch (error) {
-    console.error("❌ Failed to read users:", error);
+    console.error("Users read error:", error);
     return [];
   }
 }
@@ -77,24 +65,16 @@ function saveUsers(users) {
   );
 }
 
-// ═══════════════════════════════════════
 // HOME
-// ═══════════════════════════════════════
-
 app.get("/", (req, res) => {
   if (req.session.user) {
     return res.redirect("/dashboard");
   }
 
-  res.sendFile(
-    path.join(__dirname, "dashboard", "login.html")
-  );
+  res.sendFile(path.join(__dirname, "dashboard", "login.html"));
 });
 
-// ═══════════════════════════════════════
 // REGISTER
-// ═══════════════════════════════════════
-
 app.post("/api/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -103,6 +83,16 @@ app.post("/api/register", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Username, email and password are required."
+      });
+    }
+
+    const cleanUsername = String(username).trim();
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    if (cleanUsername.length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Username must contain at least 2 characters."
       });
     }
 
@@ -115,33 +105,27 @@ app.post("/api/register", async (req, res) => {
 
     const users = getUsers();
 
-    const normalizedEmail = String(email)
-      .trim()
-      .toLowerCase();
-
-    if (
-      users.some(
-        user => user.email === normalizedEmail
-      )
-    ) {
+    if (users.some(user => user.email === cleanEmail)) {
       return res.status(409).json({
         success: false,
-        message: "An account with this email already exists."
+        message: "Email is already registered."
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const newUser = {
+    const user = {
       id: Date.now().toString(),
-      username: String(username).trim(),
-      email: normalizedEmail,
+      username: cleanUsername,
+      email: cleanEmail,
       password: hashedPassword,
       createdAt: new Date().toISOString()
     };
 
-    users.push(newUser);
+    users.push(user);
     saveUsers(users);
+
+    console.log(`✅ New account registered: ${cleanEmail}`);
 
     return res.json({
       success: true,
@@ -149,7 +133,7 @@ app.post("/api/register", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Registration error:", error);
+    console.error("Registration error:", error);
 
     return res.status(500).json({
       success: false,
@@ -158,10 +142,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// ═══════════════════════════════════════
 // LOGIN
-// ═══════════════════════════════════════
-
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -173,14 +154,12 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
+    const cleanEmail = String(email).trim().toLowerCase();
+
     const users = getUsers();
 
-    const normalizedEmail = String(email)
-      .trim()
-      .toLowerCase();
-
     const user = users.find(
-      user => user.email === normalizedEmail
+      item => item.email === cleanEmail
     );
 
     if (!user) {
@@ -202,14 +181,13 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    // Regenerate session after successful login
     req.session.regenerate(error => {
       if (error) {
-        console.error("❌ Session regeneration error:", error);
+        console.error("Session error:", error);
 
         return res.status(500).json({
           success: false,
-          message: "Unable to create login session."
+          message: "Could not create login session."
         });
       }
 
@@ -221,13 +199,15 @@ app.post("/api/login", async (req, res) => {
 
       req.session.save(saveError => {
         if (saveError) {
-          console.error("❌ Session save error:", saveError);
+          console.error("Session save error:", saveError);
 
           return res.status(500).json({
             success: false,
-            message: "Unable to save login session."
+            message: "Could not save login session."
           });
         }
+
+        console.log(`🔐 Login successful: ${cleanEmail}`);
 
         return res.json({
           success: true,
@@ -238,7 +218,7 @@ app.post("/api/login", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Login error:", error);
+    console.error("Login error:", error);
 
     return res.status(500).json({
       success: false,
@@ -247,28 +227,21 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// ═══════════════════════════════════════
-// AUTHENTICATION MIDDLEWARE
-// ═══════════════════════════════════════
-
+// AUTH MIDDLEWARE
 function requireLogin(req, res, next) {
   if (!req.session || !req.session.user) {
     return res.status(401).json({
       success: false,
-      message:
-        "You must login first. Please login to dashboard with your email/password."
+      message: "You must login first. Please login to dashboard with your email/password."
     });
   }
 
   next();
 }
 
-// ═══════════════════════════════════════
 // DASHBOARD
-// ═══════════════════════════════════════
-
 app.get("/dashboard", (req, res) => {
-  if (!req.session || !req.session.user) {
+  if (!req.session.user) {
     return res.redirect("/login.html");
   }
 
@@ -277,9 +250,9 @@ app.get("/dashboard", (req, res) => {
   );
 });
 
-// Direct dashboard page protection
+// Protect direct index.html access
 app.get("/index.html", (req, res) => {
-  if (!req.session || !req.session.user) {
+  if (!req.session.user) {
     return res.redirect("/login.html");
   }
 
@@ -288,10 +261,7 @@ app.get("/index.html", (req, res) => {
   );
 });
 
-// ═══════════════════════════════════════
 // CURRENT USER
-// ═══════════════════════════════════════
-
 app.get("/api/me", requireLogin, (req, res) => {
   res.json({
     success: true,
@@ -299,38 +269,30 @@ app.get("/api/me", requireLogin, (req, res) => {
   });
 });
 
-// ═══════════════════════════════════════
-// SESSION STATUS
-// ═══════════════════════════════════════
-
+// SESSION
 app.get("/api/session", requireLogin, (req, res) => {
+  let whatsapp = "unknown";
+
   try {
-    res.json({
-      success: true,
-      status: "Logged in",
-      user: req.session.user,
-      whatsapp: getConnectionStatus()
-    });
+    whatsapp = getConnectionStatus();
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to read session status."
-    });
+    whatsapp = "unknown";
   }
+
+  res.json({
+    success: true,
+    status: "Logged in",
+    user: req.session.user,
+    whatsapp
+  });
 });
 
-// ═══════════════════════════════════════
-// WHATSAPP PAIRING
-// ═══════════════════════════════════════
-
+// PAIRING
 app.post("/api/pair", requireLogin, async (req, res) => {
   try {
-    let {
-      phoneNumber,
-      phone
-    } = req.body;
-
-    phoneNumber = phoneNumber || phone;
+    let phoneNumber =
+      req.body.phoneNumber ||
+      req.body.phone;
 
     if (!phoneNumber) {
       return res.status(400).json({
@@ -345,13 +307,12 @@ app.post("/api/pair", requireLogin, async (req, res) => {
     if (phoneNumber.length < 10) {
       return res.status(400).json({
         success: false,
-        message:
-          "Enter a valid international WhatsApp number."
+        message: "Enter a valid international number."
       });
     }
 
     console.log(
-      `🔗 Pairing request from ${req.session.user.username} - ${phoneNumber}`
+      `🔗 Pairing request from ${req.session.user.email}: ${phoneNumber}`
     );
 
     const code = await requestPairingCode(
@@ -362,12 +323,12 @@ app.post("/api/pair", requireLogin, async (req, res) => {
     return res.json({
       success: true,
       message: "Pairing code generated.",
-      pairingCode: code,
-      code: code
+      code,
+      pairingCode: code
     });
 
   } catch (error) {
-    console.error("❌ Pairing error:", error);
+    console.error("Pairing error:", error);
 
     return res.status(500).json({
       success: false,
@@ -378,10 +339,7 @@ app.post("/api/pair", requireLogin, async (req, res) => {
   }
 });
 
-// ═══════════════════════════════════════
 // WHATSAPP STATUS
-// ═══════════════════════════════════════
-
 app.get(
   "/api/whatsapp/status",
   requireLogin,
@@ -400,15 +358,10 @@ app.get(
   }
 );
 
-// ═══════════════════════════════════════
 // LOGOUT
-// ═══════════════════════════════════════
-
 app.post("/api/logout", requireLogin, (req, res) => {
   req.session.destroy(error => {
     if (error) {
-      console.error("❌ Logout error:", error);
-
       return res.status(500).json({
         success: false,
         message: "Logout failed."
@@ -417,25 +370,20 @@ app.post("/api/logout", requireLogin, (req, res) => {
 
     res.clearCookie("connect.sid");
 
-    return res.json({
+    res.json({
       success: true,
       message: "Logged out successfully."
     });
   });
 });
 
-// ═══════════════════════════════════════
-// HEALTH CHECK
-// ═══════════════════════════════════════
-
+// HEALTH
 app.get("/health", (req, res) => {
-  let whatsapp = null;
+  let whatsapp = "unknown";
 
   try {
     whatsapp = getConnectionStatus();
-  } catch {
-    whatsapp = "unknown";
-  }
+  } catch {}
 
   res.json({
     status: "online",
@@ -446,34 +394,28 @@ app.get("/health", (req, res) => {
   });
 });
 
-// ═══════════════════════════════════════
 // API 404
-// ═══════════════════════════════════════
-
 app.use("/api", (req, res) => {
   res.status(404).json({
     success: false,
-    message: "API endpoint not found."
+    message: "API not found."
   });
 });
 
-// ═══════════════════════════════════════
-// START SERVER
-// ═══════════════════════════════════════
-
+// START
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("═══════════════════════════════════════");
+  console.log("=======================================");
   console.log(`👑 QUEEN X running on port ${PORT}`);
-  console.log("🔐 Authentication: Email + Password");
-  console.log("📱 WhatsApp pairing: Protected");
-  console.log("═══════════════════════════════════════");
+  console.log("🔐 Email/password authentication enabled");
+  console.log("📱 WhatsApp pairing enabled");
+  console.log("=======================================");
 
   setTimeout(() => {
     startWhatsApp("main")
       .then(() => {
         console.log("📱 WhatsApp service started.");
       })
-      .catch(error => {
+      .catch(() => {
         console.log(
           "⚠️ WhatsApp not connected yet. Pair first."
         );
