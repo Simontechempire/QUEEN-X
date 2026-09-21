@@ -1,54 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>QUEEN X - Register</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:#070707;
+  color:#fff;
+  font-family:Arial,sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:20px
+}
+
+.box{
+  background:#151515;
+  border:1px solid #2a2a2a;
+  padding:30px;
+  border-radius:20px;
+  width:100%;
+  max-width:400px;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.6)
+}
+
+h2{font-size:28px;margin-bottom:8px}
+
+.subtitle{
+  color:#777;
+  font-size:13px;
+  margin-bottom:25px
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  background:#0d0d0d;
+  border:1px solid #333;
+  border-radius:12px;
+  color:#fff;
+  outline:none;
+  font-size:14px
+}
+
+input:focus{border-color:#55ff88}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  background:#fff;
+  color:#000;
+  font-weight:bold;
+  border:0;
+  border-radius:12px;
+  cursor:pointer
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed
+}
+
+.login{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid #292929;
+  color:#777;
+  font-size:13px
+}
+
+.login a{
+  color:#55ff88;
+  text-decoration:none;
+  font-weight:bold
+}
+
+.message{
+  margin-top:15px;
+  font-size:13px;
+  line-height:1.5
+}
+
+.error{color:#ff5555}
+.success{color:#55ff88}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h2>👑 QUEEN X</h2>
+
+  <p class="subtitle">
+    Create your dashboard account
+  </p>
+
+  <form id="registerForm">
+
+    <input
+      id="username"
+      type="text"
+      placeholder="Username"
+      autocomplete="username"
+      required
+    >
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Email address"
+      autocomplete="email"
+      required
+    >
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      autocomplete="new-password"
+      required
+    >
+
+    <input
+      id="confirmPassword"
+      type="password"
+      placeholder="Confirm password"
+      autocomplete="new-password"
+      required
+    >
+
+    <button id="registerButton" type="submit">
+      👑 Create Account
+    </button>
+
+  </form>
+
+  <div id="msg" class="message"></div>
+
+  <div class="login">
+    Already have an account?
+    <a href="/login.html">Login</a>
+  </div>
+
+</div>
+
 <script>
-  document
-    .getElementById("registerForm")
-    .addEventListener("submit", async function (event) {
 
-      event.preventDefault();
+document
+  .getElementById("registerForm")
+  .addEventListener("submit", async function(event){
 
-      const username =
-        document.getElementById("username").value.trim();
+    event.preventDefault();
 
-      const email =
-        document.getElementById("email").value.trim();
+    const username =
+      document.getElementById("username").value.trim();
 
-      const password =
-        document.getElementById("password").value;
+    const email =
+      document.getElementById("email").value.trim();
 
-      const confirmPassword =
-        document.getElementById("confirmPassword").value;
+    const password =
+      document.getElementById("password").value;
 
-      if (password !== confirmPassword) {
-        alert("Passwords do not match.");
-        return;
+    const confirmPassword =
+      document.getElementById("confirmPassword").value;
+
+    const button =
+      document.getElementById("registerButton");
+
+    const msg =
+      document.getElementById("msg");
+
+    if(password !== confirmPassword){
+
+      msg.className="message error";
+      msg.textContent="❌ Passwords do not match.";
+      return;
+    }
+
+    if(password.length < 6){
+
+      msg.className="message error";
+      msg.textContent=
+        "❌ Password must contain at least 6 characters.";
+      return;
+    }
+
+    button.disabled=true;
+    button.textContent="⏳ Creating Account...";
+
+    try{
+
+      const response=await fetch("/api/register",{
+        method:"POST",
+        credentials:"same-origin",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          username,
+          email,
+          password
+        })
+      });
+
+      const result=await response.json();
+
+      if(!response.ok || !result.success){
+
+        throw new Error(
+          result.message || "Registration failed."
+        );
       }
 
-      try {
-        const response = await fetch("/api/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            username,
-            email,
-            password
-          })
-        });
+      msg.className="message success";
+      msg.textContent=
+        "✅ Account created! Redirecting to login...";
 
-        const result = await response.json();
+      setTimeout(()=>{
+        window.location.href="/login.html";
+      },1000);
 
-        if (!response.ok) {
-          alert(result.message);
-          return;
-        }
+    }catch(error){
 
-        alert("Account created successfully!");
+      msg.className="message error";
+      msg.textContent="❌ "+error.message;
 
-        window.location.href = "/login.html";
+      button.disabled=false;
+      button.textContent="👑 Create Account";
+    }
 
-      } catch (error) {
-        console.error(error);
-        alert("Unable to connect to the server.");
-      }
-    });
+});
 </script>
+
+</body>
+</html>
