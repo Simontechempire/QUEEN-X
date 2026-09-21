@@ -1,841 +1,600 @@
-require("dotenv").config();
-
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
-const bcrypt = require("bcryptjs");
-const session = require("express-session");
-
 const {
-  startWhatsApp,
-  requestPairingCode,
-  getConnectionStatus
-} = require("./lib/connection");
+  default: makeWASocket,
+  useMultiFileAuthState,
+  DisconnectReason
+} = require("@whiskeysockets/baileys");
 
-const app = express();
+const pino = require("pino");
+const fs = require("fs");
+const path = require("path");
 
-const PORT = Number(process.env.PORT) || 3000;
+const AUTH_DIR = path.join(
+  __dirname,
+  "..",
+  "sessions"
+);
+
+// Keep sockets per session
+const sockets = new Map();
+const states = new Map();
+const reconnectTimers = new Map();
+const pairingLocks = new Set();
+
 
 // ═══════════════════════════════════════
-// 📁 DIRECTORIES
+// 📁 SESSION DIRECTORY
 // ═══════════════════════════════════════
 
-const DATA_DIR = path.join(__dirname, "data");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
-const DASHBOARD_DIR = path.join(__dirname, "dashboard");
-
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, {
-    recursive: true
-  });
+function ensureAuthDirectory() {
+  if (!fs.existsSync(AUTH_DIR)) {
+    fs.mkdirSync(AUTH_DIR, {
+      recursive: true
+    });
+  }
 }
 
-if (!fs.existsSync(USERS_FILE)) {
-  fs.writeFileSync(
-    USERS_FILE,
-    "[]",
-    "utf8"
+
+// ═══════════════════════════════════════
+// 📁 SESSION PATH
+// ═══════════════════════════════════════
+
+function getAuthPath(sessionId) {
+
+  if (!sessionId) {
+    throw new Error("Session ID is required.");
+  }
+
+  ensureAuthDirectory();
+
+  return path.join(
+    AUTH_DIR,
+    String(sessionId)
   );
 }
 
 
 // ═══════════════════════════════════════
-// ⚙️ MIDDLEWARE
+// 👑 START WHATSAPP SESSION
 // ═══════════════════════════════════════
 
-app.use(express.json());
+async function startWhatsApp(sessionId) {
 
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-);
+  if (!sessionId) {
+    throw new Error("Session ID is required.");
+  }
 
-app.set("trust proxy", 1);
+  const id = String(sessionId);
 
-app.use(
-  session({
-    secret:
-      process.env.SESSION_SECRET ||
-      "queen-x-session-secret-change-this",
+  // Reuse existing socket for this user
+  if (sockets.has(id)) {
+    return sockets.get(id);
+  }
 
-    resave: false,
+  const sessionPath = getAuthPath(id);
 
-    saveUninitialized: false,
+  console.log(
+    `📁 WhatsApp session: ${sessionPath}`
+  );
 
-    cookie: {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000
+  const {
+    state,
+    saveCreds
+  } = await useMultiFileAuthState(
+    sessionPath
+  );
+
+  const socket = makeWASocket({
+
+    auth: state,
+
+    logger: pino({
+      level: "silent"
+    }),
+
+    browser: [
+      "Queen X",
+      "Chrome",
+      "1.0.0"
+    ],
+
+    printQRInTerminal: false,
+
+    markOnlineOnConnect: false,
+
+    syncFullHistory: false,
+
+    generateHighQualityLinkPreview: false
+  });
+
+
+  sockets.set(id, socket);
+
+  states.set(id, "connecting");
+
+
+  // ═════════════════════════════════════
+  // 💾 SAVE CREDENTIALS
+  // ═════════════════════════════════════
+
+  socket.ev.on(
+    "creds.update",
+    async () => {
+
+      try {
+
+        await saveCreds();
+
+      } catch (error) {
+
+        console.error(
+          `❌ Failed to save credentials for ${id}:`,
+          error.message
+        );
+
+      }
+
     }
-  })
-);
+  );
+
+
+  // ═════════════════════════════════════
+  // 📡 CONNECTION UPDATE
+  // ═════════════════════════════════════
+
+  socket.ev.on(
+    "connection.update",
+    ({
+      connection,
+      lastDisconnect
+    }) => {
+
+      if (connection === "connecting") {
+
+        states.set(
+          id,
+          "connecting"
+        );
+
+        console.log(
+          `🔄 WhatsApp connecting — ${id}`
+        );
+      }
+
+
+      // ═══════════════════════════════
+      // 🟢 CONNECTED
+      // ═══════════════════════════════
+
+      if (connection === "open") {
+
+        states.set(
+          id,
+          "open"
+        );
+
+        pairingLocks.delete(id);
+
+        console.log(
+          `🟢 QUEEN X CONNECTED — SESSION ${id}`
+        );
+      }
+
+
+      // ═══════════════════════════════
+      // 🔴 CLOSED
+      // ═══════════════════════════════
+
+      if (connection === "close") {
+
+        states.set(
+          id,
+          "closed"
+        );
+
+        pairingLocks.delete(id);
+
+        const statusCode =
+          lastDisconnect
+            ?.error
+            ?.output
+            ?.statusCode;
+
+        console.log(
+          `❌ WhatsApp connection closed — ${id}:`,
+          statusCode || "unknown"
+        );
+
+
+        // Remove this socket only
+        sockets.delete(id);
+
+
+        // ═══════════════════════════════
+        // 🚪 LOGGED OUT
+        // ═══════════════════════════════
+
+        if (
+          statusCode ===
+          DisconnectReason.loggedOut
+        ) {
+
+          console.log(
+            `🚪 WhatsApp logged out — ${id}`
+          );
+
+          return;
+        }
+
+
+        // ═══════════════════════════════
+        // 🚫 SESSION REJECTED
+        // ═══════════════════════════════
+
+        if (
+          statusCode === 401 ||
+          statusCode === 405
+        ) {
+
+          console.log(
+            `⚠️ WhatsApp session rejected — ${id}`
+          );
+
+          return;
+        }
+
+
+        // ═══════════════════════════════
+        // 🔄 RECONNECT
+        // ═══════════════════════════════
+
+        if (
+          !reconnectTimers.has(id)
+        ) {
+
+          const timer =
+            setTimeout(
+              async () => {
+
+                reconnectTimers.delete(id);
+
+                try {
+
+                  await startWhatsApp(id);
+
+                } catch (error) {
+
+                  console.error(
+                    `❌ Reconnect failed — ${id}:`,
+                    error.message
+                  );
+
+                }
+
+              },
+              5000
+            );
+
+          reconnectTimers.set(
+            id,
+            timer
+          );
+        }
+
+      }
+
+    }
+  );
+
+
+  return socket;
+}
 
 
 // ═══════════════════════════════════════
-// 🌐 STATIC DASHBOARD
+// 🔗 REQUEST PAIRING CODE
 // ═══════════════════════════════════════
 
-app.use(
-  express.static(DASHBOARD_DIR)
-);
+async function requestPairingCode(
+  phoneNumber,
+  sessionId
+) {
+
+  if (!phoneNumber) {
+    throw new Error(
+      "WhatsApp phone number is required."
+    );
+  }
+
+  if (!sessionId) {
+    throw new Error(
+      "Session ID is required."
+    );
+  }
 
 
-// ═══════════════════════════════════════
-// 👤 USERS
-// ═══════════════════════════════════════
+  const id =
+    String(sessionId);
 
-function getUsers() {
+
+  const number =
+    String(phoneNumber)
+      .replace(/\D/g, "");
+
+
+  if (number.length < 10) {
+
+    throw new Error(
+      "Enter a valid international WhatsApp number."
+    );
+
+  }
+
+
+  // Prevent two pairing requests
+  // for the same user at once.
+
+  if (pairingLocks.has(id)) {
+
+    throw new Error(
+      "A pairing request is already in progress. Please wait."
+    );
+
+  }
+
+
+  pairingLocks.add(id);
+
 
   try {
 
-    if (!fs.existsSync(USERS_FILE)) {
-      return [];
+    // ═══════════════════════════════════
+    // CHECK EXISTING SESSION
+    // ═══════════════════════════════════
+
+    const existingSocket =
+      sockets.get(id);
+
+
+    if (existingSocket) {
+
+      const currentState =
+        states.get(id);
+
+
+      if (
+        currentState === "open" &&
+        existingSocket.user
+      ) {
+
+        throw new Error(
+          "This WhatsApp session is already connected."
+        );
+
+      }
+
+
+      // Close an unfinished socket
+      try {
+
+        existingSocket.end(
+          new Error(
+            "Starting fresh pairing"
+          )
+        );
+
+      } catch {}
+
+      sockets.delete(id);
+
     }
 
-    const data =
-      fs.readFileSync(
-        USERS_FILE,
-        "utf8"
+
+    // ═══════════════════════════════════
+    // START SESSION
+    // ═══════════════════════════════════
+
+    console.log(
+      `🆕 Starting pairing session: ${id}`
+    );
+
+
+    const socket =
+      await startWhatsApp(id);
+
+
+    // ═══════════════════════════════════
+    // WAIT FOR CONNECTION INITIALIZATION
+    // ═══════════════════════════════════
+
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          2000
+        )
+    );
+
+
+    // ═══════════════════════════════════
+    // REQUEST CODE
+    // ═══════════════════════════════════
+
+    console.log(
+      `🔗 Requesting pairing code for ${number}`
+    );
+
+
+    const code =
+      await socket.requestPairingCode(
+        number
       );
 
-    if (!data.trim()) {
-      return [];
+
+    if (!code) {
+
+      throw new Error(
+        "WhatsApp returned an empty pairing code."
+      );
+
     }
 
-    const users =
-      JSON.parse(data);
 
-    return Array.isArray(users)
-      ? users
-      : [];
+    console.log(
+      `🔑 Pairing code generated for ${id}: ${code}`
+    );
+
+
+    return code;
 
   } catch (error) {
 
     console.error(
-      "❌ Users file error:",
+      `❌ Pairing failed — ${id}:`,
       error.message
     );
 
-    return [];
+    throw error;
+
+  } finally {
+
+    pairingLocks.delete(id);
+
   }
-}
 
-
-function saveUsers(users) {
-
-  fs.writeFileSync(
-    USERS_FILE,
-    JSON.stringify(
-      users,
-      null,
-      2
-    ),
-    "utf8"
-  );
 }
 
 
 // ═══════════════════════════════════════
-// 🏠 HOME
+// 📡 GET SOCKET
 // ═══════════════════════════════════════
 
-app.get("/", (req, res) => {
+function getSocket(sessionId) {
 
-  if (req.session.user) {
-
-    return res.redirect(
-      "/dashboard"
-    );
+  if (!sessionId) {
+    return null;
   }
 
-  return res.sendFile(
-    path.join(
-      DASHBOARD_DIR,
-      "login.html"
-    )
-  );
-});
-
-
-// ═══════════════════════════════════════
-// 📝 REGISTER
-// ═══════════════════════════════════════
-
-app.post(
-  "/api/register",
-  async (req, res) => {
-
-    try {
-
-      const username =
-        String(
-          req.body.username || ""
-        ).trim();
-
-      const email =
-        String(
-          req.body.email || ""
-        ).trim()
-        .toLowerCase();
-
-      const password =
-        String(
-          req.body.password || ""
-        );
-
-      if (
-        !username ||
-        !email ||
-        !password
-      ) {
-
-        return res.status(400).json({
-          success: false,
-          message:
-            "Username, email and password are required."
-        });
-      }
-
-
-      if (password.length < 6) {
-
-        return res.status(400).json({
-          success: false,
-          message:
-            "Password must be at least 6 characters."
-        });
-      }
-
-
-      const users =
-        getUsers();
-
-
-      const existingUser =
-        users.find(
-          user =>
-            String(user.email)
-              .toLowerCase() === email
-        );
-
-
-      if (existingUser) {
-
-        return res.status(409).json({
-          success: false,
-          message:
-            "Email already registered. Please login."
-        });
-      }
-
-
-      const hashedPassword =
-        await bcrypt.hash(
-          password,
-          12
-        );
-
-
-      const newUser = {
-
-        id:
-          Date.now().toString(),
-
-        username,
-
-        email,
-
-        password:
-          hashedPassword,
-
-        createdAt:
-          new Date().toISOString()
-
-      };
-
-
-      users.push(newUser);
-
-      saveUsers(users);
-
-
-      console.log(
-        `👤 New user registered: ${email}`
-      );
-
-
-      return res.json({
-
-        success: true,
-
-        message:
-          "Account created successfully."
-
-      });
-
-    } catch (error) {
-
-      console.error(
-        "❌ Registration error:",
-        error
-      );
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          "Registration failed."
-
-      });
-    }
-  }
-);
-
-
-// ═══════════════════════════════════════
-// 🔐 LOGIN
-// ═══════════════════════════════════════
-
-app.post(
-  "/api/login",
-  async (req, res) => {
-
-    try {
-
-      const email =
-        String(
-          req.body.email || ""
-        ).trim()
-        .toLowerCase();
-
-      const password =
-        String(
-          req.body.password || ""
-        );
-
-
-      if (
-        !email ||
-        !password
-      ) {
-
-        return res.status(400).json({
-
-          success: false,
-
-          message:
-            "Email and password are required."
-
-        });
-      }
-
-
-      const users =
-        getUsers();
-
-
-      const user =
-        users.find(
-          item =>
-            String(item.email)
-              .trim()
-              .toLowerCase() === email
-        );
-
-
-      if (!user) {
-
-        console.log(
-          `❌ Login failed: user not found - ${email}`
-        );
-
-        return res.status(401).json({
-
-          success: false,
-
-          message:
-            "Invalid email or password."
-
-        });
-      }
-
-
-      const validPassword =
-        await bcrypt.compare(
-          password,
-          user.password
-        );
-
-
-      if (!validPassword) {
-
-        console.log(
-          `❌ Login failed: wrong password - ${email}`
-        );
-
-        return res.status(401).json({
-
-          success: false,
-
-          message:
-            "Invalid email or password."
-
-        });
-      }
-
-
-      req.session.user = {
-
-        id:
-          user.id,
-
-        username:
-          user.username,
-
-        email:
-          user.email
-
-      };
-
-
-      console.log(
-        `✅ Login successful: ${email}`
-      );
-
-
-      return res.json({
-
-        success: true,
-
-        message:
-          "Login successful.",
-
-        user:
-          req.session.user
-
-      });
-
-    } catch (error) {
-
-      console.error(
-        "❌ Login error:",
-        error
-      );
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          "Login failed."
-
-      });
-    }
-  }
-);
-
-
-// ═══════════════════════════════════════
-// 🔒 LOGIN CHECK
-// ═══════════════════════════════════════
-
-function requireLogin(
-  req,
-  res,
-  next
-) {
-
-  if (!req.session.user) {
-
-    return res.status(401).json({
-
-      success: false,
-
-      message:
-        "You must login first."
-
-    });
-  }
-
-  next();
+  return sockets.get(
+    String(sessionId)
+  ) || null;
 }
 
 
 // ═══════════════════════════════════════
-// 📊 DASHBOARD
+// 📊 CONNECTION STATUS
 // ═══════════════════════════════════════
 
-app.get(
-  "/dashboard",
-  (req, res) => {
+function getConnectionStatus(sessionId) {
 
-    if (!req.session.user) {
+  if (!sessionId) {
 
-      return res.redirect(
-        "/login.html"
-      );
-    }
+    return {
+      status: "closed",
+      connected: false,
+      pairing: false,
+      session: null
+    };
 
-    return res.sendFile(
-      path.join(
-        DASHBOARD_DIR,
-        "index.html"
-      )
-    );
   }
-);
+
+
+  const id =
+    String(sessionId);
+
+
+  const status =
+    states.get(id) || "closed";
+
+
+  return {
+
+    status,
+
+    connected:
+      status === "open",
+
+    pairing:
+      pairingLocks.has(id),
+
+    session:
+      id
+
+  };
+
+}
 
 
 // ═══════════════════════════════════════
-// 👤 CURRENT USER
+// 🚪 LOGOUT / REMOVE SESSION
 // ═══════════════════════════════════════
 
-app.get(
-  "/api/me",
-  requireLogin,
-  (req, res) => {
+async function logoutSession(sessionId) {
 
-    res.json({
+  const id =
+    String(sessionId);
 
-      success: true,
-
-      user:
-        req.session.user
-
-    });
-  }
-);
+  const socket =
+    sockets.get(id);
 
 
-// ═══════════════════════════════════════
-// 🔗 WHATSAPP PAIRING
-// ═══════════════════════════════════════
-
-app.post(
-  "/api/pair",
-  requireLogin,
-  async (req, res) => {
+  if (socket) {
 
     try {
 
-      let phone =
-        req.body.phone ||
-        req.body.phoneNumber;
-
-
-      phone =
-        String(
-          phone || ""
-        )
-        .replace(/\D/g, "");
-
-
-      if (!phone) {
-
-        return res.status(400).json({
-
-          success: false,
-
-          message:
-            "WhatsApp number is required."
-
-        });
-      }
-
-
-      if (phone.length < 10) {
-
-        return res.status(400).json({
-
-          success: false,
-
-          message:
-            "Enter a valid international WhatsApp number."
-
-        });
-      }
-
-
-      console.log(
-        `🔗 Pair request from ${req.session.user.email}: ${phone}`
-      );
-
-
-      const code =
-        await requestPairingCode(
-          phone,
-          "main"
-        );
-
-
-      return res.json({
-
-        success: true,
-
-        message:
-          "Pairing code generated.",
-
-        code: code,
-
-        pairingCode: code
-
-      });
+      await socket.logout();
 
     } catch (error) {
 
       console.error(
-        "❌ Pairing error:",
-        error
+        `Logout error — ${id}:`,
+        error.message
       );
 
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          error.message ||
-          "Failed to generate pairing code."
-
-      });
     }
+
   }
-);
 
 
-// ═══════════════════════════════════════
-// 📡 WHATSAPP STATUS
-// ═══════════════════════════════════════
+  sockets.delete(id);
 
-app.get(
-  "/api/whatsapp/status",
-  requireLogin,
-  (req, res) => {
+  states.delete(id);
 
-    try {
+  pairingLocks.delete(id);
 
-      return res.json({
 
-        success: true,
+  const timer =
+    reconnectTimers.get(id);
 
-        whatsapp:
-          getConnectionStatus()
 
-      });
+  if (timer) {
 
-    } catch (error) {
+    clearTimeout(timer);
 
-      return res.status(500).json({
+    reconnectTimers.delete(id);
 
-        success: false,
-
-        message:
-          "Unable to read WhatsApp status."
-
-      });
-    }
   }
-);
+
+}
 
 
 // ═══════════════════════════════════════
-// 📊 SESSION STATUS
+// 📤 EXPORT
 // ═══════════════════════════════════════
 
-app.get(
-  "/api/session",
-  requireLogin,
-  (req, res) => {
+module.exports = {
 
-    try {
+  startWhatsApp,
 
-      return res.json({
+  requestPairingCode,
 
-        success: true,
+  getSocket,
 
-        user:
-          req.session.user,
+  getConnectionStatus,
 
-        whatsapp:
-          getConnectionStatus()
+  logoutSession,
 
-      });
+  ensureAuthDirectory,
 
-    } catch (error) {
+  getAuthPath
 
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          "Unable to check session."
-
-      });
-    }
-  }
-);
-
-
-// ═══════════════════════════════════════
-// 🚪 LOGOUT
-// ═══════════════════════════════════════
-
-app.post(
-  "/api/logout",
-  requireLogin,
-  (req, res) => {
-
-    req.session.destroy(
-      error => {
-
-        if (error) {
-
-          console.error(
-            "❌ Logout error:",
-            error
-          );
-
-          return res.status(500).json({
-
-            success: false,
-
-            message:
-              "Logout failed."
-
-          });
-        }
-
-
-        res.clearCookie(
-          "connect.sid"
-        );
-
-
-        return res.json({
-
-          success: true,
-
-          message:
-            "Logged out successfully."
-
-        });
-      }
-    );
-  }
-);
-
-
-// ═══════════════════════════════════════
-// ❤️ HEALTH
-// ═══════════════════════════════════════
-
-app.get(
-  "/health",
-  (req, res) => {
-
-    res.json({
-
-      status: "online",
-
-      bot: "Queen X",
-
-      uptime:
-        Math.floor(
-          process.uptime()
-        ),
-
-      whatsapp:
-        getConnectionStatus(),
-
-      timestamp:
-        new Date().toISOString()
-
-    });
-  }
-);
-
-
-// ═══════════════════════════════════════
-// ❌ UNKNOWN API
-// ═══════════════════════════════════════
-
-app.use(
-  "/api",
-  (req, res) => {
-
-    res.status(404).json({
-
-      success: false,
-
-      message:
-        "API endpoint not found."
-
-    });
-  }
-);
-
-
-// ═══════════════════════════════════════
-// 🚀 START SERVER
-// ═══════════════════════════════════════
-
-app.listen(
-  PORT,
-  "0.0.0.0",
-  () => {
-
-    console.log("");
-    console.log(
-      "╔══════════════════════════════════════╗"
-    );
-    console.log(
-      "║          👑 QUEEN X                  ║"
-    );
-    console.log(
-      "╠══════════════════════════════════════╣"
-    );
-    console.log(
-      `║  🟢 Server running on port ${PORT}       ║`
-    );
-    console.log(
-      "║  🌐 Dashboard ready                  ║"
-    );
-    console.log(
-      "╚══════════════════════════════════════╝"
-    );
-    console.log("");
-
-    /*
-     * Start WhatsApp in the background.
-     * A pairing request can also start it
-     * when needed.
-     */
-
-    setTimeout(() => {
-
-      startWhatsApp("main")
-        .then(() => {
-
-          console.log(
-            "📡 WhatsApp service started."
-          );
-
-        })
-        .catch(error => {
-
-          console.log(
-            "⚠️ WhatsApp not connected yet."
-          );
-
-          console.log(
-            error.message
-          );
-
-        });
-
-    }, 3000);
-  }
-);
+};
