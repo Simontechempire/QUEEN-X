@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
@@ -7,19 +7,23 @@
 
 <meta
   name="viewport"
-  content="width=device-width,initial-scale=1"
+  content="width=device-width, initial-scale=1"
 >
 
 <title>QUEEN X Login</title>
 
 <style>
 
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   min-height:100vh;
   background:#050505;
   color:white;
-  font-family:Arial;
+  font-family:Arial,sans-serif;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -34,10 +38,11 @@ body{
   border-radius:20px;
   border:1px solid #292929;
   text-align:center;
+  box-shadow:0 10px 40px rgba(0,0,0,.4);
 }
 
 h1{
-  margin-bottom:5px;
+  margin:0 0 5px;
 }
 
 p{
@@ -47,13 +52,17 @@ p{
 
 input{
   width:100%;
-  box-sizing:border-box;
   padding:15px;
   margin:7px 0;
   border-radius:12px;
   border:1px solid #333;
   background:#090909;
   color:white;
+  outline:none;
+}
+
+input:focus{
+  border-color:#55ff88;
 }
 
 button{
@@ -65,10 +74,12 @@ button{
   background:white;
   color:black;
   font-weight:bold;
+  cursor:pointer;
 }
 
 button:disabled{
   opacity:.5;
+  cursor:not-allowed;
 }
 
 a{
@@ -79,6 +90,7 @@ a{
 #message{
   margin-top:15px;
   font-size:13px;
+  min-height:18px;
 }
 
 </style>
@@ -89,48 +101,49 @@ a{
 
 <div class="box">
 
-<h1>👑 QUEEN X</h1>
+  <h1>👑 QUEEN X</h1>
 
-<p>Login to your dashboard</p>
+  <p>Login to your dashboard</p>
 
-<input
-  id="email"
-  type="email"
-  placeholder="Email"
->
+  <input
+    id="username"
+    type="text"
+    placeholder="Username"
+    autocomplete="username"
+  >
 
-<input
-  id="password"
-  type="password"
-  placeholder="Password"
->
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+    autocomplete="current-password"
+  >
 
-<button
-  id="loginBtn"
-  onclick="login()"
->
-🔐 LOGIN
-</button>
+  <button
+    id="loginBtn"
+    onclick="login()"
+  >
+    🔐 LOGIN
+  </button>
 
-<div id="message"></div>
+  <div id="message"></div>
 
-<p>
-Don't have an account?
-<a href="/register.html">
-Register
-</a>
-</p>
+  <p>
+    Don't have an account?
+    <a href="/register.html">
+      Register
+    </a>
+  </p>
 
 </div>
-
 
 <script>
 
 async function login(){
 
-  const email =
+  const username =
     document
-      .getElementById("email")
+      .getElementById("username")
       .value
       .trim();
 
@@ -140,35 +153,28 @@ async function login(){
       .value;
 
   const message =
-    document.getElementById(
-      "message"
-    );
+    document.getElementById("message");
 
   const button =
-    document.getElementById(
-      "loginBtn"
-    );
+    document.getElementById("loginBtn");
 
-  if(
-    !email ||
-    !password
-  ){
+  if(!username || !password){
 
     message.style.color =
       "#ff5555";
 
     message.textContent =
-      "❌ Enter email and password.";
+      "❌ Enter username and password.";
 
     return;
-
   }
 
-  button.disabled =
-    true;
+  button.disabled = true;
 
   button.textContent =
     "⏳ LOGIN...";
+
+  message.textContent = "";
 
   try{
 
@@ -177,15 +183,18 @@ async function login(){
         "/api/login",
         {
           method:"POST",
+
           credentials:"same-origin",
+
           headers:{
             "Content-Type":
               "application/json"
           },
+
           body:
             JSON.stringify({
-              email,
-              password
+              username: username,
+              password: password
             })
         }
       );
@@ -211,8 +220,12 @@ async function login(){
     message.textContent =
       "✅ Login successful.";
 
-    window.location.href =
-      "/dashboard";
+    setTimeout(() => {
+
+      window.location.href =
+        "/dashboard";
+
+    }, 500);
 
   }catch(error){
 
@@ -223,8 +236,7 @@ async function login(){
       "❌ " +
       error.message;
 
-    button.disabled =
-      false;
+    button.disabled = false;
 
     button.textContent =
       "🔐 LOGIN";
@@ -232,6 +244,19 @@ async function login(){
   }
 
 }
+
+document
+  .getElementById("password")
+  .addEventListener(
+    "keydown",
+    function(event){
+
+      if(event.key === "Enter"){
+        login();
+      }
+
+    }
+  );
 
 </script>
 
