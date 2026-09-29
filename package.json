@@ -8,10 +8,11 @@
     "dev": "node server.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.0.0"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "latest",
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "@hapi/boom": "^9.1.3",
     "bcryptjs": "2.4.3",
     "dotenv": "16.4.7",
     "express": "4.21.2",
